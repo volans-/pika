@@ -129,3 +129,24 @@ def test_connection_tune_demarshal():
 
     # Run the frame check, assertions contained within
     test_support.check_frame(frame, expectation)
+
+def test_connection_open_ok_demarshal():
+    frame_data = (u'\x01\x00\x00\x00\x00\x00\x05\x00\n\x00)\x00\xce')
+
+    expectation = {'known_hosts': ''}
+
+    # Decode the frame and validate lengths
+    consumed, channel, frame = amqp.frame.demarshal(frame_data)
+
+    # Validate the bytes consumed
+    if consumed != 13:
+        assert False, 'Bytes consumed did not match the expected value'
+
+    # Validate the channel
+    if channel != 0:
+        assert False, 'Channel number did not match the expected value'
+
+    # Run the frame check, assertions contained within
+    test_support.check_frame(frame, expectation)
+
+
