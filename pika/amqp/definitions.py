@@ -9,9 +9,9 @@ For copyright and licensing please refer to COPYING.
 """
 
 __date__ = "2011-09-24"
-__author__ = "codegen.py"
+__author__ = "./codegen.py"
 
-from . import method
+from pika import codec
 
 # AMQP Protocol Version
 AMQP_VERSION = (0, 9, 1)
@@ -70,6 +70,52 @@ AMQP_DOMAINS = {"channel-id": "longstr",
 
 # Other constants
 DEPRECATION_WARNING = "This command is deprecated in AMQP 0-9-1"
+
+
+class Frame(object):
+    """Base Class for AMQP Methods which specifies the encoding and decoding
+    behavior.
+
+    """
+    arguments = list()
+    id = 0
+    index = 0
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    def demarshal(self, data):
+        """
+        Dynamically decode the frame data applying the values to the method
+        object by iterating through the attributes in order and decoding them.
+
+        :param data: The binary encoded method data
+        :type data: str
+
+        """
+        for argument in self.arguments:
+            data_type = getattr(self.__class__, argument)
+            consumed, value = codec.decode.by_type(data, data_type)
+            setattr(self, argument, value)
+            data = data[consumed:]
+
+    def marshal(self):
+        """
+        Dynamically encode the frame by taking the list of attributes and
+        encode them item by item getting the value form the object attribute
+        and the data type from the class attribute.
+
+        :returns: unicode
+
+        """
+        output = list()
+        for argument in self.arguments:
+            output.append(codec.encode.by_type(getattr(self,
+                                                       argument),
+                                               getattr(self.__class__,
+                                                       argument)))
+        return u''.join(output)
 
 
 # AMQP Errors
@@ -290,7 +336,7 @@ class Connection(object):
     id = 10
     index = 0x000A0000
 
-    class Start(method.Method):
+    class Start(Frame):
         """Start connection negotiation
 
         This method starts the connection negotiation process by telling the
@@ -354,7 +400,7 @@ class Connection(object):
             # Available message locales
             self.locales = locales
 
-    class StartOk(method.Method):
+    class StartOk(Frame):
         """Select security mechanism and locale
 
         This method selects a SASL security mechanism.
@@ -405,7 +451,7 @@ class Connection(object):
             # Selected message locale
             self.locale = locale
 
-    class Secure(method.Method):
+    class Secure(Frame):
         """Security mechanism challenge
 
         The SASL protocol works by exchanging challenges and responses until
@@ -439,7 +485,7 @@ class Connection(object):
             # Security challenge data
             self.challenge = challenge
 
-    class SecureOk(method.Method):
+    class SecureOk(Frame):
         """Security mechanism response
 
         This method attempts to authenticate, passing a block of SASL data for
@@ -469,7 +515,7 @@ class Connection(object):
             # Security response data
             self.response = response
 
-    class Tune(method.Method):
+    class Tune(Frame):
         """Propose connection tuning parameters
 
         This method proposes a set of connection configuration values to the
@@ -516,7 +562,7 @@ class Connection(object):
             # Desired heartbeat delay
             self.heartbeat = heartbeat
 
-    class TuneOk(method.Method):
+    class TuneOk(Frame):
         """Negotiate connection tuning parameters
 
         This method sends the client's connection tuning parameters to the
@@ -561,7 +607,7 @@ class Connection(object):
             # Desired heartbeat delay
             self.heartbeat = heartbeat
 
-    class Open(method.Method):
+    class Open(Frame):
         """Open connection to virtual host
 
         This method opens a connection to a virtual host, which is a collection
@@ -611,7 +657,7 @@ class Connection(object):
             # Deprecated
             self.insist = insist
 
-    class OpenOk(method.Method):
+    class OpenOk(Frame):
         """Signal that connection is ready
 
         This method signals to the client that the connection is ready for use.
@@ -640,7 +686,7 @@ class Connection(object):
             # Deprecated
             self.known_hosts = known_hosts
 
-    class Close(method.Method):
+    class Close(Frame):
         """Request a connection close
 
         This method indicates that the sender wants to close the connection.
@@ -698,7 +744,7 @@ class Connection(object):
             # Failing method ID
             self.method_id = method_id
 
-    class CloseOk(method.Method):
+    class CloseOk(Frame):
         """Confirm a connection close
 
         This method confirms a Connection.Close method and tells the recipient
@@ -732,7 +778,7 @@ class Channel(object):
     id = 20
     index = 0x00140000
 
-    class Open(method.Method):
+    class Open(Frame):
         """Open a channel for use
 
         This method opens a channel to the server.
@@ -764,7 +810,7 @@ class Channel(object):
             # Protocol level field, do not use, must be zero.
             self.out_of_band = out_of_band
 
-    class OpenOk(method.Method):
+    class OpenOk(Frame):
         """Signal that the channel is ready
 
         This method signals to the client that the channel is ready for use.
@@ -793,7 +839,7 @@ class Channel(object):
             # Deprecated
             self.channel_id = channel_id
 
-    class Flow(method.Method):
+    class Flow(Frame):
         """Enable/disable flow from peer
 
         This method asks the peer to pause or restart the flow of content data
@@ -830,7 +876,7 @@ class Channel(object):
             # Start/stop content frames
             self.active = active
 
-    class FlowOk(method.Method):
+    class FlowOk(Frame):
         """Confirm a flow method
 
         Confirms to the peer that a flow command was received and processed.
@@ -859,7 +905,7 @@ class Channel(object):
             # Current flow setting
             self.active = active
 
-    class Close(method.Method):
+    class Close(Frame):
         """Request a channel close
 
         This method indicates that the sender wants to close the channel. This
@@ -917,7 +963,7 @@ class Channel(object):
             # Failing method ID
             self.method_id = method_id
 
-    class CloseOk(method.Method):
+    class CloseOk(Frame):
         """Confirm a channel close
 
         This method confirms a Channel.Close method and tells the recipient
@@ -950,7 +996,7 @@ class Exchange(object):
     id = 40
     index = 0x00280000
 
-    class Declare(method.Method):
+    class Declare(Frame):
         """Verify exchange exists, create if needed
 
         This method creates an exchange if it does not already exist, and if
@@ -1041,7 +1087,7 @@ class Exchange(object):
             # Arguments for declaration
             self.arguments = arguments
 
-    class DeclareOk(method.Method):
+    class DeclareOk(Frame):
         """Confirm exchange declaration
 
         This method confirms a Declare method and confirms the name of the
@@ -1062,7 +1108,7 @@ class Exchange(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Delete(method.Method):
+    class Delete(Frame):
         """Delete an exchange
 
         This method deletes an exchange. When an exchange is deleted all queue
@@ -1116,7 +1162,7 @@ class Exchange(object):
             # Do not send a reply method
             self.nowait = nowait
 
-    class DeleteOk(method.Method):
+    class DeleteOk(Frame):
         """Confirm deletion of an exchange
 
         This method confirms the deletion of an exchange.
@@ -1136,7 +1182,7 @@ class Exchange(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Bind(method.Method):
+    class Bind(Frame):
         """Bind exchange to an exchange
 
         This method binds an exchange to an exchange.
@@ -1204,7 +1250,7 @@ class Exchange(object):
             # Arguments for binding
             self.arguments = arguments
 
-    class BindOk(method.Method):
+    class BindOk(Frame):
         """Confirm bind successful
 
         This method confirms that the bind was successful.
@@ -1224,7 +1270,7 @@ class Exchange(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Unbind(method.Method):
+    class Unbind(Frame):
         """Unbind an exchange from an exchange
 
         This method unbinds an exchange from an exchange.
@@ -1290,7 +1336,7 @@ class Exchange(object):
             # Arguments of binding
             self.arguments = arguments
 
-    class UnbindOk(method.Method):
+    class UnbindOk(Frame):
         """Confirm unbind successful
 
         This method confirms that the unbind was successful.
@@ -1323,7 +1369,7 @@ class Queue(object):
     id = 50
     index = 0x00320000
 
-    class Declare(method.Method):
+    class Declare(Frame):
         """Declare queue, create if needed
 
         This method creates or checks a queue. When creating a new queue the
@@ -1407,7 +1453,7 @@ class Queue(object):
             # Arguments for declaration
             self.arguments = arguments
 
-    class DeclareOk(method.Method):
+    class DeclareOk(Frame):
         """Confirms a queue definition
 
         This method confirms a Declare method and confirms the name of the
@@ -1451,7 +1497,7 @@ class Queue(object):
             # Number of consumers
             self.consumer_count = consumer_count
 
-    class Bind(method.Method):
+    class Bind(Frame):
         """Bind queue to an exchange
 
         This method binds a queue to an exchange. Until a queue is bound it
@@ -1521,7 +1567,7 @@ class Queue(object):
             # Arguments for binding
             self.arguments = arguments
 
-    class BindOk(method.Method):
+    class BindOk(Frame):
         """Confirm bind successful
 
         This method confirms that the bind was successful.
@@ -1541,7 +1587,7 @@ class Queue(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Purge(method.Method):
+    class Purge(Frame):
         """Purge a queue
 
         This method removes all messages from a queue which are not awaiting
@@ -1587,7 +1633,7 @@ class Queue(object):
             # Do not send a reply method
             self.nowait = nowait
 
-    class PurgeOk(method.Method):
+    class PurgeOk(Frame):
         """Confirms a queue purge
 
         This method confirms the purge of a queue.
@@ -1615,7 +1661,7 @@ class Queue(object):
 
             self.message_count = message_count
 
-    class Delete(method.Method):
+    class Delete(Frame):
         """Delete a queue
 
         This method deletes a queue. When a queue is deleted any pending
@@ -1677,7 +1723,7 @@ class Queue(object):
             # Do not send a reply method
             self.nowait = nowait
 
-    class DeleteOk(method.Method):
+    class DeleteOk(Frame):
         """Confirm deletion of a queue
 
         This method confirms the deletion of a queue.
@@ -1705,7 +1751,7 @@ class Queue(object):
 
             self.message_count = message_count
 
-    class Unbind(method.Method):
+    class Unbind(Frame):
         """Unbind a queue from an exchange
 
         This method unbinds a queue from an exchange.
@@ -1764,7 +1810,7 @@ class Queue(object):
             # Arguments of binding
             self.arguments = arguments
 
-    class UnbindOk(method.Method):
+    class UnbindOk(Frame):
         """Confirm unbind successful
 
         This method confirms that the unbind was successful.
@@ -1796,7 +1842,7 @@ class Basic(object):
     id = 60
     index = 0x003C0000
 
-    class Qos(method.Method):
+    class Qos(Frame):
         """Specify quality of service
 
         This method requests a specific quality of service. The QoS can be
@@ -1847,7 +1893,7 @@ class Basic(object):
             # Apply to entire connection
             self.global_ = global_
 
-    class QosOk(method.Method):
+    class QosOk(Frame):
         """Confirm the requested qos
 
         This method tells the client that the requested QoS levels could be
@@ -1869,7 +1915,7 @@ class Basic(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Consume(method.Method):
+    class Consume(Frame):
         """Start a queue consumer
 
         This method asks the server to start a "consumer", which is a transient
@@ -1952,7 +1998,7 @@ class Basic(object):
             # Arguments for declaration
             self.arguments = arguments
 
-    class ConsumeOk(method.Method):
+    class ConsumeOk(Frame):
         """Confirm a new consumer
 
         The server provides the client with a consumer tag, which is used by
@@ -1981,7 +2027,7 @@ class Basic(object):
 
             self.consumer_tag = consumer_tag
 
-    class Cancel(method.Method):
+    class Cancel(Frame):
         """End a queue consumer
 
         This method cancels a consumer. This does not affect already delivered
@@ -2032,7 +2078,7 @@ class Basic(object):
             # Do not send a reply method
             self.nowait = nowait
 
-    class CancelOk(method.Method):
+    class CancelOk(Frame):
         """Confirm a cancelled consumer
 
         This method confirms that the cancellation was completed.
@@ -2061,7 +2107,7 @@ class Basic(object):
             # Consumer tag
             self.consumer_tag = consumer_tag
 
-    class Publish(method.Method):
+    class Publish(Frame):
         """Publish a message
 
         This method publishes a message to a specific exchange. The message
@@ -2121,7 +2167,7 @@ class Basic(object):
             # Request immediate delivery
             self.immediate = immediate
 
-    class Return(method.Method):
+    class Return(Frame):
         """Return a failed message
 
         This method returns an undeliverable message that was published with
@@ -2174,7 +2220,7 @@ class Basic(object):
             # Message routing key
             self.routing_key = routing_key
 
-    class Deliver(method.Method):
+    class Deliver(Frame):
         """Notify the client of a consumer message
 
         This method delivers a message to the client, via a consumer. In the
@@ -2234,7 +2280,7 @@ class Basic(object):
             # Message routing key
             self.routing_key = routing_key
 
-    class Get(method.Method):
+    class Get(Frame):
         """Direct access to a queue
 
         This method provides a direct access to the messages in a queue using a
@@ -2281,7 +2327,7 @@ class Basic(object):
             # No acknowledgement needed
             self.no_ack = no_ack
 
-    class GetOk(method.Method):
+    class GetOk(Frame):
         """Provide client with a message
 
         This method delivers a message to the client following a get method. A
@@ -2340,7 +2386,7 @@ class Basic(object):
             # Number of messages in queue
             self.message_count = message_count
 
-    class GetEmpty(method.Method):
+    class GetEmpty(Frame):
         """Indicate no messages available
 
         This method tells the client that the queue has no messages available
@@ -2370,7 +2416,7 @@ class Basic(object):
             # Deprecated
             self.cluster_id = cluster_id
 
-    class Ack(method.Method):
+    class Ack(Frame):
         """Acknowledge one or more messages
 
         When sent by the client, this method acknowledges one or more messages
@@ -2411,7 +2457,7 @@ class Basic(object):
             # Acknowledge multiple messages
             self.multiple = multiple
 
-    class Reject(method.Method):
+    class Reject(Frame):
         """Reject an incoming message
 
         This method allows a client to reject a message. It can be used to
@@ -2449,7 +2495,7 @@ class Basic(object):
             # Requeue the message
             self.requeue = requeue
 
-    class RecoverAsync(method.Method):
+    class RecoverAsync(Frame):
         """Redeliver unacknowledged messages
 
         This method asks the server to redeliver all unacknowledged messages on
@@ -2485,7 +2531,7 @@ class Basic(object):
             # This command is deprecated in AMQP 0-9-1
             raise DeprecationWarning(DEPRECATION_WARNING)
 
-    class Recover(method.Method):
+    class Recover(Frame):
         """Redeliver unacknowledged messages
 
         This method asks the server to redeliver all unacknowledged messages on
@@ -2516,7 +2562,7 @@ class Basic(object):
             # Requeue the message
             self.requeue = requeue
 
-    class RecoverOk(method.Method):
+    class RecoverOk(Frame):
         """Confirm recovery
 
         This method acknowledges a Basic.Recover method.
@@ -2536,7 +2582,7 @@ class Basic(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Nack(method.Method):
+    class Nack(Frame):
         """Reject one or more incoming messages
 
         This method allows a client to reject one or more incoming messages. It
@@ -2584,7 +2630,7 @@ class Basic(object):
             # Requeue the message
             self.requeue = requeue
 
-    class Properties(object):
+    class Properties(Frame):
         """Content Properties"""
 
         def __init__(self, content_type=None, content_encoding=None,
@@ -2686,7 +2732,7 @@ class Tx(object):
     id = 90
     index = 0x005A0000
 
-    class Select(method.Method):
+    class Select(Frame):
         """Select standard transaction mode
 
         This method sets the channel to use standard transactions. The client
@@ -2711,7 +2757,7 @@ class Tx(object):
             # Valid responses to this method
             self.valid_responses = [Tx.SelectOk]
 
-    class SelectOk(method.Method):
+    class SelectOk(Frame):
         """Confirm transaction mode
 
         This method confirms to the client that the channel was successfully
@@ -2732,7 +2778,7 @@ class Tx(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Commit(method.Method):
+    class Commit(Frame):
         """Commit the current transaction
 
         This method commits all message publications and acknowledgments
@@ -2757,7 +2803,7 @@ class Tx(object):
             # Valid responses to this method
             self.valid_responses = [Tx.CommitOk]
 
-    class CommitOk(method.Method):
+    class CommitOk(Frame):
         """Confirm a successful commit
 
         This method confirms to the client that the commit succeeded. Note that
@@ -2778,7 +2824,7 @@ class Tx(object):
             # Specifies if this is a synchronous AMQP method
             self.synchronous = False
 
-    class Rollback(method.Method):
+    class Rollback(Frame):
         """Abandon the current transaction
 
         This method abandons all message publications and acknowledgments
@@ -2805,7 +2851,7 @@ class Tx(object):
             # Valid responses to this method
             self.valid_responses = [Tx.RollbackOk]
 
-    class RollbackOk(method.Method):
+    class RollbackOk(Frame):
         """Confirm successful rollback
 
         This method confirms to the client that the rollback succeeded. Note
@@ -2849,7 +2895,7 @@ class Confirm(object):
     id = 85
     index = 0x00550000
 
-    class Select(method.Method):
+    class Select(Frame):
         """Select confirm mode (i.e. enable publisher acknowledgements)
 
         This method sets the channel to use publisher acknowledgements. The
@@ -2882,7 +2928,7 @@ class Confirm(object):
             # Do not send a reply method
             self.nowait = nowait
 
-    class SelectOk(method.Method):
+    class SelectOk(Frame):
         """Acknowledge confirm mode
 
         This method confirms to the client that the channel was successfully

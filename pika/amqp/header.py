@@ -5,7 +5,7 @@
 # ***** END LICENSE BLOCK *****
 
 """
-AMQP Protocol Header Definition
+AMQP Header Class Definitions
 
 """
 
@@ -42,7 +42,7 @@ class ProtocolHeader(object):
 
         :param data: The binary encoded method data
         :type data: unicode
-        :returns: int byte count of data used to demashal the frame
+        :returns: int byte count of data used to demarshal the frame
         :raises: ValueError
 
         """
@@ -51,7 +51,7 @@ class ProtocolHeader(object):
                 (self.major_version,
                  self.minor_version,
                  self.revision) = struct.unpack('BBB', data[5:8])
-            except struct.error as error:
+            except struct.error:
                 raise ValueError('Data did not match the ProtocolHeader '
                                  'format: %r', data)
 
@@ -72,4 +72,6 @@ class ProtocolHeader(object):
                                      self.major_version,
                                      self.minor_version,
                                      self.revision)
+
+
 

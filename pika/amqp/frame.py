@@ -18,7 +18,6 @@ import struct
 
 from . import definitions
 from . import header
-from . import method
 from pika import codec
 
 
@@ -161,5 +160,4 @@ def _frame_parts(data_in):
             channel_number,
             frame_end,
             data_in[_CONTENT_FRAME_HEADER_SIZE:frame_end])
-
 

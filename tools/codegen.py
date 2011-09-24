@@ -9,14 +9,15 @@ __date__ = '2011-03-31'
 
 CODEGEN_DIR = 'rabbitmq-codegen-default'
 CODEGEN_IGNORE_CLASSES = ['access']
-CODEGEN_JSON = 'amqp-rabbitmq-0.9.1.json'
-CODEGEN_XML = 'amqp0-9-1.xml'
+CODEGEN_JSON = '../codegen/amqp-rabbitmq-0.9.1.json'
+CODEGEN_XML = '../codegen/amqp0-9-1.xml'
 CODEGEN_OUTPUT = '../pika/amqp/definitions.py'
 CODEGEN_JSON_URL = ('http://hg.rabbitmq.com'
                     '/rabbitmq-codegen/archive/default.tar.bz2')
 CODEGEN_XML_URL = 'http://www.rabbitmq.com/resources/specs/amqp0-9-1.xml'
 
 XPATH_ORDER = ['class', 'constant', 'method', 'field']
+PREPEND = ['../codegen/frame.py']
 
 from datetime import date
 from json import load
@@ -320,7 +321,7 @@ new_line()
 new_line('__date__ = "%s"' % date.today().isoformat())
 new_line('__author__ = "%s"' % __file__)
 new_line()
-new_line('from . import method')
+new_line('from pika import codec')
 new_line()
 
 # AMQP Version Header
@@ -388,6 +389,13 @@ DEPRECATION_WARNING = 'This command is deprecated in AMQP %s' % \
 new_line('DEPRECATION_WARNING = "%s"' % DEPRECATION_WARNING)
 new_line()
 
+
+# Prepend the content from the files specified
+for filename in PREPEND:
+    with open(filename, 'r') as handle:
+        content = handle.read()
+        for line in content.split('\n'):
+            new_line(line)
 
 # Warnings and Exceptions
 new_line()
@@ -475,7 +483,7 @@ for class_name in class_list:
     # Build the list of methods
     methods = list()
     for method in definition['methods']:
-        new_line('class %s(method.Method):' %
+        new_line('class %s(Frame):' %
                  pep8_class_name(method['name']), indent)
         indent += 4
 
@@ -610,7 +618,7 @@ for class_name in class_list:
         indent -= 8
 
     if 'properties' in definition and definition['properties']:
-        new_line('class Properties(object):', indent)
+        new_line('class Properties(Frame):', indent)
         indent += 4
         comment('"""Content Properties"""', indent, '')
         new_line()
@@ -652,7 +660,6 @@ for class_name in class_list:
 
         # End of function
         indent -= 4
-
 
 comment("AMQP Class.Method Index Mapping")
 mapping = list()

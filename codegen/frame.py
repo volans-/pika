@@ -1,16 +1,5 @@
-"""
-AMQP Method Base Method Class
 
-"""
-
-__author__ = 'Gavin M. Roy'
-__email__ = 'gmr@myyearbook.com'
-__since__ = '2011-09-23'
-
-from pika import codec
-
-
-class Method(object):
+class Frame(object):
     """Base Class for AMQP Methods which specifies the encoding and decoding
     behavior.
 
