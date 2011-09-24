@@ -8,7 +8,8 @@
 Functions for encoding data of various types including field tables and arrays
 
 """
-__author__ = 'Gavin M. Roy <gmr@myyearbook.com>'
+__author__ = 'Gavin M. Roy'
+__email__ = 'gmr@myyearbook.com'
 __since__ = '2011-03-29'
 
 import calendar
@@ -107,6 +108,19 @@ def long_string(value):
     return struct.pack('>I', len(value)) + value
 
 
+def octet(value):
+    """Encode an octet value.
+
+    :param value: Value to encode.
+    :type value: int.
+    :returns: str.
+
+    """
+    if not isinstance(value, int):
+        raise ValueError("int type required")
+    return struct.pack('>B', value)
+
+
 def short_int(value):
     """Encode a short integer.
 
@@ -188,8 +202,7 @@ def field_table(value):
     data = list()
     for key in value:
         # Append the field header / delimiter
-        data.append(struct.pack('B', len(key)))
-        data.append(key)
+        data.append(short_string(key))
         try:
             data.append(encode_table_value(value[key]))
         except ValueError as err:
@@ -213,15 +226,11 @@ def table_integer(value):
     if -32768 < value < 32767:
         return 'U' + short_int(int(value))
     elif -2147483648 < value < 2147483647:
-        result = 'I' + long_int(long(value))
+        return 'I' + long_int(long(value))
     elif -9223372036854775808 < value < 9223372036854775807:
-        result = 'L' + long_long_int(long(value))
-    else:
-        raise ValueError("Numeric value exceeds long-long-int max: %r",
-                         value)
+        return 'L' + long_long_int(long(value))
 
-    # Return the encoded value
-    return result
+    raise ValueError("Numeric value exceeds long-long-int max: %r" % value)
 
 
 def encode_table_value(value):
@@ -281,6 +290,8 @@ def by_type(value, data_type):
         return long_long_int(value)
     elif data_type == 'longstr':
         return long_string(value)
+    elif data_type == 'octet':
+        return octet(value)
     elif data_type == 'short':
         return short_int(value)
     elif data_type == 'shortstr':
