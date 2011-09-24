@@ -23,8 +23,8 @@ from pika import codec
 
 _CONTENT_FRAME_HEADER_SIZE = 7
 _CONTENT_FRAME_END_SIZE = 1
-_CONTENT_FRAME_END_BYTE = 206
-_DEMARSHALLING_FAILURE = 0, None, None, None
+
+_DEMARSHALLING_FAILURE = 0, 0, None
 _LOGGER = logging.getLogger('pika.amqp.frame')
 
 
@@ -32,33 +32,44 @@ def demarshal(data_in):
     """Takes in binary data and maps builds the appropriate frame type,
     returning a frame object.
 
-    :param data_in: Raw byte stream data.
-    :type data_in: unicode.
-    :returns: tuple of bytes consumed and obj.
-    :raises: AMQPFrameError.
+    :param data_in: Raw byte stream data
+    :type data_in: unicode
+    :returns: tuple of  bytes consumed, channel, and a frame object
+    :raises: AMQPFrameError
 
     """
     # Look to see if it's a protocol header frame
     try:
         consumed, frame = _demarshal_protocol_header_frame(data_in)
         if consumed:
-            return consumed, frame
+            return consumed, 0, frame
     except ValueError:
         _LOGGER.warning('Demarshalling error processing a ProtocolHeader '
                         'frame: %r', data_in)
         # It was a protocol header but it didn't decode properly
         return _DEMARSHALLING_FAILURE
 
+    # split the data into parts
+    frame_data = data_in.split(unichr(definitions.AMQP_FRAME_END))[0]
+
+    # How much data we should consume
+    bytes_consumed = len(frame_data) + 1
+
+    # The lengths should not match, the frame end byte should be gone
+    if (bytes_consumed - 1) == len(data_in):
+        return _DEMARSHALLING_FAILURE
+
     # Decode the low level frame and break it into parts
     try:
-        frame_type, channel, frame_end, data = _frame_parts(data_in)
+        frame_type, channel, frame_data = _frame_parts(frame_data)
     except ValueError:
         _LOGGER.warning('Demarshalling error processing a content frame: %r',
                         data_in)
         return _DEMARSHALLING_FAILURE
 
     if frame_type == definitions.AMQP_FRAME_METHOD:
-        return channel, _demarshal_method_frame(data, frame_end)
+        return bytes_consumed, channel, _demarshal_method_frame(frame_data)
+
 
     #elif frame_type == amqp.AMQP_FRAME_HEADER:
     #    return decode_header_frame(channel, data, frame_end)
@@ -99,13 +110,11 @@ def _demarshal_protocol_header_frame(data_in):
         raise ValueError('Frame data did not meet minimum length requirements')
 
 
-def _demarshal_method_frame(frame_data, frame_end):
+def _demarshal_method_frame(frame_data):
     """Attempt to demarshal a method frame
 
     :param frame_data: Raw frame data to assign to our method frame
     :type frame_data: unicode
-    :param frame_end: Offset where the frame is supposed to end
-    :type frame_end: int
     :returns: tuple of the amount of data consumed and the frame object
 
     """
@@ -115,22 +124,21 @@ def _demarshal_method_frame(frame_data, frame_end):
     # Create an instance of the method object we're going to demarshal
     method = definitions.INDEX_MAPPING[method_index]()
 
-    # Demarshal the data in the object
-    consumed = method.demarshal(frame_data[1:frame_end]) + 1
+    # Demarshal the data
+    method.demarshal(frame_data[bytes_used:])
 
-    # Return the bytes consumed and the method object
-    return consumed, method
+    #  Demarshal the data in the object and return it
+    return method
 
 
 def _frame_parts(data_in):
     """Try and decode a low-level AMQP frame and return the parts of the frame.
 
-    :param data_in: Raw byte stream data.
-    :type data_in: unicode.
-    :returns: tuple of frame type, channel number, frame_end offset and
-              the frame data to decode.
-    :raises: ValueError.
-    :raises: AMQPFrameError.
+    :param data_in: Raw byte stream data
+    :type data_in: unicode
+    :returns: tuple of frame type, channel number, and frame data to decode
+    :raises: ValueError
+    :raises: AMQPFrameError
 
     """
     # Get the Frame Type, Channel Number and Frame Size
@@ -143,22 +151,8 @@ def _frame_parts(data_in):
         # We didn't get a full frame
         return _DEMARSHALLING_FAILURE
 
-    # Get the frame data size
-    frame_end = data_in.find(chr(definitions.AMQP_FRAME_END))
-
-    # Validate the frame size vs the frame end position
-
-    # We don't have all of the frame yet
-    if frame_end > len(data_in):
-        raise ValueError
-
-    # The Frame termination chr is wrong
-    if data_in[frame_end] != chr(_CONTENT_FRAME_END_BYTE):
-        raise definitions.AMQPFrameError("Invalid CONTENT_FRAME_END_BYTE")
-
     # Return the values, including the raw frame data
     return (frame_type,
             channel_number,
-            frame_end,
-            data_in[_CONTENT_FRAME_HEADER_SIZE:frame_end])
+            data_in[_CONTENT_FRAME_HEADER_SIZE:])
 
