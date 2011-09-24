@@ -7,6 +7,7 @@ class Frame(object):
     arguments = list()
     id = 0
     index = 0
+    name = 'Frame'
 
     def demarshal(self, data):
         """
