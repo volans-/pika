@@ -13,33 +13,6 @@ import test_support
 from pika import amqp
 
 
-def validate_method_frame(frame_handle, method):
-    """
-    Pass in a fully decoded frame object and it will validate that it is a
-    method frame and return the frame.method object for additional test
-    inspection.
-    """
-    pass
-
-
-def validate_attribute(method, attribute, attribute_type, value='ignore'):
-    """
-    Validate that the given method object has the specified attribute of the
-    specified attribute_type. If a value is passed in, validate that as well
-    """
-    if not hasattr(method.frame, attribute):
-        assert False, "%s missing %s attribute" % (method.frame, attribute)
-
-    if getattr(method.frame, attribute) and \
-       not isinstance(getattr(method.frame, attribute), attribute_type):
-        assert False, "%s.%s is not %s" % \
-                      (method.frame, attribute, attribute_type)
-
-    if value != 'ignore' and value != getattr(method.frame, attribute):
-        assert False, "Expected a value of %r, received %r" % \
-                      (value, getattr(method.frame, attribute))
-
-
 def test_protocol_header_marshal():
     frame_data = u'AMQP\x00\x00\t\x01'
     test = amqp.ProtocolHeader()
@@ -66,6 +39,7 @@ def test_protocol_header_demarshal():
         test.revision) != amqp.definitions.AMQP_VERSION:
         assert False, "Invalid Protocol Version: %i-%i-%i" % \
                       (test.major_version, test.minor_version, test.revision)
+
 
 def test_connection_start_demarshal():
     frame_data = (u'\x01\x00\x00\x00\x00\x01G\x00\n\x00\n\x00\t\x00\x00\x01'
@@ -108,6 +82,7 @@ def test_connection_start_demarshal():
     # Run the frame check, assertions contained within
     test_support.check_frame(frame, expectation)
 
+
 def test_connection_tune_demarshal():
     frame_data = (u'\x01\x00\x00\x00\x00\x00\x0c\x00\n\x00\x1e\x00\x00\x00\x02'
                   u'\x00\x00\x00\x00\xce')
@@ -130,6 +105,7 @@ def test_connection_tune_demarshal():
     # Run the frame check, assertions contained within
     test_support.check_frame(frame, expectation)
 
+
 def test_connection_open_ok_demarshal():
     frame_data = (u'\x01\x00\x00\x00\x00\x00\x05\x00\n\x00)\x00\xce')
 
@@ -150,3 +126,22 @@ def test_connection_open_ok_demarshal():
     test_support.check_frame(frame, expectation)
 
 
+def test_channel_open_ok_demarshal():
+    frame_data = (u'\x01\x00\x01\x00\x00\x00\x08\x00\x14\x00\x0b\x00\x00\x00'
+                  u'\x00\xce')
+
+    expectation = {'channel_id': ''}
+
+    # Decode the frame and validate lengths
+    consumed, channel, frame = amqp.frame.demarshal(frame_data)
+
+    # Validate the bytes consumed
+    if consumed != 16:
+        assert False, 'Bytes consumed did not match the expected value'
+
+    # Validate the channel
+    if channel != 1:
+        assert False, 'Channel number did not match the expected value'
+
+    # Run the frame check, assertions contained within
+    test_support.check_frame(frame, expectation)
