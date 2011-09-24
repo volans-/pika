@@ -7,17 +7,17 @@ __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-03-31'
 
-CODEGEN_DIR = 'rabbitmq-codegen-default'
+CODEGEN_DIR = '../codegen/'
 CODEGEN_IGNORE_CLASSES = ['access']
-CODEGEN_JSON = '../codegen/amqp-rabbitmq-0.9.1.json'
-CODEGEN_XML = '../codegen/amqp0-9-1.xml'
+CODEGEN_JSON = CODEGEN_DIR + 'amqp-rabbitmq-0.9.1.json'
+CODEGEN_XML = CODEGEN_DIR + 'amqp0-9-1.xml'
 CODEGEN_OUTPUT = '../pika/amqp/definitions.py'
 CODEGEN_JSON_URL = ('http://hg.rabbitmq.com'
                     '/rabbitmq-codegen/archive/default.tar.bz2')
 CODEGEN_XML_URL = 'http://www.rabbitmq.com/resources/specs/amqp0-9-1.xml'
 
 XPATH_ORDER = ['class', 'constant', 'method', 'field']
-PREPEND = ['../codegen/frame.py']
+PREPEND = [CODEGEN_DIR + 'frame.py']
 
 from datetime import date
 from json import load
@@ -255,7 +255,7 @@ def new_function(function_name, arguments, indent=0):
 if not exists(CODEGEN_JSON):
 
     # Retrieve the codegen archive
-    print "Downloading codegen JSON file."
+    print "Downloading codegen JSON file to %s." % CODEGEN_JSON
     handle = urlopen(CODEGEN_JSON_URL)
     bzip2_tarball = handle.read()
 
@@ -266,7 +266,8 @@ if not exists(CODEGEN_JSON):
 
     # Extract the CODEGEN_JSON file to this directory
     tarball = tarfile_open(tempfile.name, 'r:*')
-    json_data = tarball.extractfile('%s/%s' % (CODEGEN_DIR, CODEGEN_JSON))
+    archived_file = 'rabbitmq-codegen-default/' + CODEGEN_JSON.split('/')[-1]
+    json_data = tarball.extractfile(archived_file)
 
     # Write out the JSON file
     with open(CODEGEN_JSON, 'w') as handle:
@@ -297,7 +298,7 @@ with open(CODEGEN_XML, 'r') as handle:
     xml = amqp_xml.xpath('//amqp')[0]
 
 # Read in the codegen RabbitMQ Extension XML file
-with open('extensions.xml', 'r') as handle:
+with open(CODEGEN_DIR + 'extensions.xml', 'r') as handle:
     rabbitmq_xml = etree.parse(handle)
     rabbitmq = rabbitmq_xml.xpath('//rabbitmq')[0]
 

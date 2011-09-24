@@ -5,5 +5,5 @@
 build
 dist
 pika.egg-info/
-tools/*.json
-tools/amqp*.xml
+codegen/*.json
+codegen/amqp*.xml
