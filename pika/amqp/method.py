@@ -1,18 +1,20 @@
 """
-AMQP Method Base Class
+AMQP Method Base Method Class
 
 """
 
-__author__ = 'Gavin M. Roy <gmr@myyearbook.com>'
+__author__ = 'Gavin M. Roy'
+__email__ = 'gmr@myyearbook.com'
 __since__ = '2011-09-23'
-
-import struct
 
 from pika import codec
 
 
 class Method(object):
+    """Base Class for AMQP Methods which specifies the encoding and decoding
+    behavior.
 
+    """
     arguments = list()
     id = 0
     index = 0
@@ -20,6 +22,21 @@ class Method(object):
     @property
     def name(self):
         return self.__class__.__name__
+
+    def decode(self, data):
+        """
+        Dynamically decode the frame data applying the values to the method
+        object by iterating through the attributes in order and decoding them.
+
+        :param data: The binary encoded method data
+        :type data: str
+
+        """
+        for argument in self.arguments:
+            data_type = getattr(self.__class__, argument)
+            consumed, value = codec.decode.by_type(data, data_type)
+            setattr(self, argument, value)
+            data = data[consumed:]
 
     def encode(self):
         """
@@ -31,9 +48,6 @@ class Method(object):
 
         """
         output = list()
-        output.append(struct.pack('>I', self.__class__.index))
-
-        print output
         for argument in self.arguments:
             output.append(codec.encode.by_type(getattr(self,
                                                        argument),
