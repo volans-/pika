@@ -44,7 +44,8 @@ def demarshal(data_in):
         if consumed:
             return consumed, frame
     except ValueError:
-        _LOGGER.warning('Could not demarshal the expected ProtocolHeader frame')
+        _LOGGER.warning('Demarshalling error processing a ProtocolHeader '
+                        'frame: %r', data_in)
         # It was a protocol header but it didn't decode properly
         return _DEMARSHALLING_FAILURE
 
@@ -52,6 +53,8 @@ def demarshal(data_in):
     try:
         frame_type, channel, frame_end, data = _frame_parts(data_in)
     except ValueError:
+        _LOGGER.warning('Demarshalling error processing a content frame: %r',
+                        data_in)
         return _DEMARSHALLING_FAILURE
 
     if frame_type == definitions.AMQP_FRAME_METHOD:
@@ -65,8 +68,6 @@ def demarshal(data_in):
 
     #elif frame_type == amqp.AMQP_FRAME_HEARTBEAT:
     #    consumed, frame_obj = decode_heartbeat_frame(channel, data, frame_end)
-
-
 
     raise definitions.AMQPFrameError("Unknown frame type: %i" % frame_type)
 
