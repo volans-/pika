@@ -109,3 +109,16 @@ def compare_dicts(source, dest, method='Unknown'):
             assert False, "Unexpectationed item %s: %r" % \
                           (key, source[key])
 
+
+def check_frame(frame, expectation):
+    for key in expectation.keys():
+
+        # Validate we have the key
+        if not hasattr(frame, key):
+            assert False, "%s did not have the expected key: %s" % \
+                          (frame.name, key)
+
+        # Validate decimal, int, long, str, nothing special needed
+        if getattr(frame, key) != expectation[key]:
+            assert False, "%s did not match the expectation for: %s" % \
+                          (frame.name, key)
