@@ -165,10 +165,11 @@ def test_table_value_short_string():
     value = 's\n0123456789'
     length, expectation = codec.decode._embedded_value(value)
     if not isinstance(expectation, basestring):
-        assert False, "decode._embedded_value did not return a str: %r" % expectation
+        assert False, \
+            "decode._embedded_value did not return a str: %r" % expectation
     if expectation != '0123456789':
         assert False, \
-            "decode._embedded_value did not return '0123456789': %r" % expectation
+            "decode._embedded_value return value did not match the expectation: %r" % expectation
 
 
 def test_table_value_x00():
@@ -187,7 +188,7 @@ def test_table_value_unknown():
         return
 
     assert False, \
-        'decode._embedded_value for GOOD did not throw a ValueError: %r' % expectation
+        'decode._embedded_value did not throw a ValueError: %r' % expectation
 
 
 def test_decode_timestamp():
@@ -222,7 +223,8 @@ def test_decode_field_array():
             -9223372036854775800]
     length, expectation = codec.decode.field_array(value)
     if not isinstance(expectation, list):
-        assert False, "decode.field_array did not return a list: %r" % expectation
+        assert False, \
+            "decode.field_array did not return a list: %r" % expectation
     test_support.compare_lists(data, expectation, 'decode.field_array')
 
 
@@ -243,7 +245,8 @@ T\x00\x00\x00\x00Ec)\x92\x06decvalD\x02\x00\x00\x01:\x08arrayvalA\x00\x00\x00\
             'arrayval': [1, 2, 3]}
     length, expectation = codec.decode.field_table(value)
     if not isinstance(expectation, dict):
-        assert False, "decode.field_table did not return a dict: %r" % expectation
+        assert False, \
+            "decode.field_table did not return a dict: %r" % expectation
     test_support.compare_dicts(data, expectation, 'decode.field_table')
 
 

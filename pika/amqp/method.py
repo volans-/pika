@@ -23,7 +23,7 @@ class Method(object):
     def name(self):
         return self.__class__.__name__
 
-    def decode(self, data):
+    def demarshal(self, data):
         """
         Dynamically decode the frame data applying the values to the method
         object by iterating through the attributes in order and decoding them.
@@ -38,7 +38,7 @@ class Method(object):
             setattr(self, argument, value)
             data = data[consumed:]
 
-    def encode(self):
+    def marshal(self):
         """
         Dynamically encode the frame by taking the list of attributes and
         encode them item by item getting the value form the object attribute

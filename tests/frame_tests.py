@@ -9,8 +9,8 @@ __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-04-10'
 
 import test_support
-from pika.amqp import definitions as amqp
-from pika import frame
+
+from pika import amqp
 
 
 def validate_method_frame(frame_handle, method):
@@ -40,19 +40,19 @@ def validate_attribute(method, attribute, attribute_type, value='ignore'):
                       (value, getattr(method.frame, attribute))
 
 
-def test_protocol_header_encode():
-    frame_data = 'AMQP\x00\x00\t\x01'
-    test = frame.ProtocolHeader()
-    if test.encode() != frame_data:
+def test_protocol_header_marshal():
+    frame_data = u'AMQP\x00\x00\t\x01'
+    test = amqp.ProtocolHeader()
+    if test.marshal() != frame_data:
         assert False, "ProtocolHeader frame did not match frame data sample"
 
 
-def test_protocol_header_decode():
+def test_protocol_header_demarshal():
     # Raw Frame Data
-    frame_data = 'AMQP\x00\x00\t\x01'
+    frame_data = u'AMQP\x00\x00\t\x01'
 
     # Decode the frame and validate lengths
-    bytes_read, test = frame.decode_frame(frame_data)
+    bytes_read, test = amqp.frame.demarshal(frame_data)
 
     if test.__class__.__name__ != 'ProtocolHeader':
         assert False, "Invalid Frame Type: %s" % test.__class__.__name__
@@ -63,6 +63,6 @@ def test_protocol_header_decode():
 
     if (test.major_version,
         test.minor_version,
-        test.revision) != amqp.AMQP_VERSION:
+        test.revision) != amqp.definitions.AMQP_VERSION:
         assert False, "Invalid Protocol Version: %i-%i-%i" % \
                       (test.major_version, test.minor_version, test.revision)

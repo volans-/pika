@@ -15,7 +15,7 @@ from pika.amqp import definitions as amqp
 def decode_connection_open_test():
     data = u'\x04test\x00\x01'
     test_method = amqp.Connection.Open()
-    test_method.decode(data)
+    test_method.demarshal(data)
     test_support.validate_attribute(test_method, 'insist', bool, True)
     test_support.validate_attribute(test_method, 'capabilities',
                                     basestring, '')
@@ -28,7 +28,7 @@ def encode_connection_open_test():
     test_method = amqp.Connection.Open(virtual_host='test',
                                        capabilities='',
                                        insist=True)
-    frame_data = test_method.encode()
+    frame_data = test_method.marshal()
     if frame_data != expectation:
         assert False, ("%s did not encode the frame as expected:\n%r\n%r" %
                        (test_method.__class__.__name__,
@@ -39,7 +39,7 @@ def decode_connection_start_test():
     data = (u'\x00\t\x00\x00\x00!\x07products\x08RabbitMQ\x07version'
              's\x052.6.1\x00\x00\x00\x05PLAIN\x00\x00\x00\x05uk_UK')
     test_method = amqp.Connection.Start()
-    test_method.decode(data)
+    test_method.demarshal(data)
     test_support.validate_attribute(test_method, 'version_major', int, 0)
     test_support.validate_attribute(test_method, 'version_minor', int, 9)
     test_support.validate_attribute(test_method,
@@ -58,7 +58,7 @@ def encode_connection_start_test():
     test_method = amqp.Connection.Start(0, 9, {'product': 'RabbitMQ',
                                                'version': "2.6.1"},
                                         'PLAIN', 'uk_UK')
-    frame_data = test_method.encode()
+    frame_data = test_method.marshal()
     if frame_data != expectation:
         assert False, ("%s did not encode the frame as expected:\n%r\n%r" %
                        (test_method.__class__.__name__,
