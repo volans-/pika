@@ -158,7 +158,7 @@ def get_label(search_path):
             return node[0].text.strip()[0:1].upper() + \
                    node[0].text.strip()[1:].strip()
 
-    print 'Label couldnt find %r' % search_path
+    print 'Label couldn\'t find %r' % search_path
     return None
 
 
@@ -188,13 +188,13 @@ def get_argument_type_doc(argument):
         elif argument['type'] == "longlong":
             return 'int/long'
         elif argument['type'] == "longstr":
-            return 'str'
+            return 'unicode'
         elif argument['type'] == "octet":
             return 'int'
         elif argument['type'] == "short":
             return 'int'
         elif argument['type'] == "shortstr":
-            return 'str'
+            return 'unicode'
         elif argument['type'] == "table":
             return 'dict'
         elif argument['type'] == "timestamp":
@@ -547,13 +547,11 @@ for class_name in class_list:
                                    'method': method['name'],
                                    'field': argument['name']})
                 if label:
-                    if label[-1] != '.':
-                        label += '.'
                     new_line(':param %s: %s' % (name, label), indent)
                 else:
                     new_line(':param %s:' % name, indent)
-                new_line(':type %s: %s.' % (name,
-                                            get_argument_type_doc(argument)),
+                new_line(':type %s: %s' % (name,
+                                           get_argument_type_doc(argument)),
                          indent)
 
         # Note the deprecation warning in the docblock
@@ -631,8 +629,6 @@ for class_name in class_list:
             label = get_label({'class': class_name,
                                'field': argument['name']})
             if label:
-                if label[-1] != '.':
-                    label += '.'
                 line = ':param %s: %s' % (name, label)
                 new_line(line.strip(), indent)
 
