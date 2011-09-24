@@ -7,6 +7,7 @@
 AMQP Data Decoder
 
 Functions for decoding data of various types including field tables and arrays
+
 """
 __author__ = 'Gavin M. Roy <gmr@myyearbook.com>'
 __since__ = '2011-03-30'
@@ -72,17 +73,6 @@ def long_long_int(value):
 
     """
     return 8, struct.unpack_from('>q', value)[0]
-
-
-def octet(value):
-    """Decode an octet value.
-
-    :param value: Value to decode.
-    :type value: str.
-    :returns: tuple of bytes used and a char value.
-
-    """
-    return 1, struct.unpack_from('>b', value)[0]
 
 
 def short_int(value):
@@ -250,7 +240,6 @@ METHODS = {"bit": boolean,
            "long": long_int,
            "longlong": long_long_int ,
            "longstr": long_string,
-           "octet": octet,
            "short": short_int,
            "shortstr": short_string,
            "table": field_table,

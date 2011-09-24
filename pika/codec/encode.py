@@ -6,6 +6,7 @@
 """AMQP Data Encoder
 
 Functions for encoding data of various types including field tables and arrays
+
 """
 __author__ = 'Gavin M. Roy <gmr@myyearbook.com>'
 __since__ = '2011-03-29'
@@ -209,11 +210,11 @@ def _encode_integer(value):
 
     """
     # Send the appropriately sized data value
-    if value > -32768 and value < 32767:
+    if -32768 < value < 32767:
         result = short_int(int(value))
-    elif value > -2147483648 and value < 2147483647:
+    elif -2147483648 < value < 2147483647:
         result = long_int(long(value))
-    elif value > -9223372036854775808 and value < 9223372036854775807:
+    elif -9223372036854775808 < value < 9223372036854775807:
         result = long_long_int(long(value))
     else:
         raise ValueError("Numeric value exceeds long-long-int max: %r",
