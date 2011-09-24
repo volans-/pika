@@ -96,6 +96,28 @@ def compare_dicts(source, dest, method='Unknown'):
 
 # -- Decoding Tests --
 
+def test_decode_none():
+    length, check = codec.decode._decode_value('\x00')
+    if check is not None:
+        assert False, "decode._decode_value did not return None: %r" % check
+
+
+def test_decode_unknown():
+    try:
+        codec.decode._decode_value('Z\x00')
+    except ValueError:
+        return
+    assert False, "decode._decode_value did not raise a ValueError Exception"
+
+
+def test_decode_by_type_unknown():
+    try:
+        codec.decode.decode_by_type('Z\x00', 'foobar')
+    except ValueError:
+        return
+    assert False, "decode.decode_by_type did not raise a ValueError Exception"
+
+
 def test_decode_bool_false():
     value = '\x00'
     length, check = codec.decode.boolean(value)
@@ -144,6 +166,17 @@ def test_decode_long():
                       check
 
 
+def test_decode_by_type_long():
+    value = '\x7f\xff\xff\xff\xff\xff\xff\xf8'
+    length, check = codec.decode.decode_by_type(value, 'longlong')
+    if not isinstance(check, int) and not isinstance(check, long):
+        assert False, "decode.long_int did not return an int: %r" % check
+    if check != 9223372036854775800:
+        assert False, \
+                "decode.long_int did not return 9223372036854775800: %r" % \
+                check
+
+
 def test_decode_long_long():
     value = '\x7f\xff\xff\xff\xff\xff\xff\xf8'
     length, check = codec.decode.long_long_int(value)
@@ -172,6 +205,24 @@ def test_decode_long_string():
         assert False, \
             "decode.long_string did not return '0123456789': %r" % check
 
+def test_decode_by_type_long_string():
+    value = '\x00\x00\x00\n0123456789'
+    length, check = codec.decode.decode_by_type(value, 'longstr')
+    if not isinstance(check, basestring):
+        assert False, "decode.decode_by_type did not return a str: %r" % check
+    if check != '0123456789':
+        assert False, \
+            "decode.decode_by_type did not return '0123456789': %r" % check
+
+def test_decode_value_short_string():
+    value = 's\n0123456789'
+    length, check = codec.decode._decode_value(value)
+    if not isinstance(check, basestring):
+        assert False, "decode._decode_value did not return a str: %r" % check
+    if check != '0123456789':
+        assert False, \
+            "decode._decode_value did not return '0123456789': %r" % check
+
 
 def test_decode_short_string():
     value = '\n0123456789'
@@ -193,6 +244,17 @@ def test_decode_timestamp():
         assert False, \
         "decode.timestamp did not return '2006, 11, 21, 16, 30, 10': %r" % \
         check
+
+
+def test_decode_by_type_timestamp():
+    value = '\x00\x00\x00\x00Ec)\x92'
+    length, check = codec.decode.decode_by_type(value, 'timestamp')
+    if not isinstance(check, struct_time):
+        assert False, \
+            "decode.decode_by_type did not return a struct_time: %r" % check
+    if mktime(check) != mktime((2006, 11, 21, 16, 30, 10, 1, 325, 0)):
+        assert False, ("decode.decode_by_type did not return '2006, "
+                       "11, 21, 16, 30, 10': %r" % check)
 
 
 def test_decode_field_array():
@@ -225,9 +287,29 @@ T\x00\x00\x00\x00Ec)\x92\x06decvalD\x02\x00\x00\x01:\x08arrayvalA\x00\x00\x00\
             'arrayval': [1, 2, 3]}
     length, check = codec.decode.field_table(value)
     if not isinstance(check, dict):
-        assert False, "decode.field_table did not return a list: %r" % check
+        assert False, "decode.field_table did not return a dict: %r" % check
     compare_dicts(data, check, 'decode.field_table')
 
+
+def test_decode_field_table_by_type():
+    value = '\x00\x00\x00\x92\x07longvalI6e&U\x08floatvlaf@H\xf5\xc3\x07\
+boolvalt\x01\x06strvalS\x00\x00\x00\x04Test\x06intvalU\x00\x01\x0ctimestampval\
+T\x00\x00\x00\x00Ec)\x92\x06decvalD\x02\x00\x00\x01:\x08arrayvalA\x00\x00\x00\
+\tU\x00\x01U\x00\x02U\x00\x03\x07dictvalF\x00\x00\x00\x0c\x03fooS\x00\x00\x00\
+\x03bar'
+    data = {'intval': 1,
+            'strval': 'Test',
+            'boolval': True,
+            'timestampval': datetime(2006, 11, 21, 16, 30, 10).timetuple(),
+            'decval': Decimal('3.14'),
+            'floatvla': 3.14,
+            'longval': long(912598613),
+            'dictval': {'foo': 'bar'},
+            'arrayval': [1, 2, 3]}
+    length, check = codec.decode.decode_by_type(value, 'table')
+    if not isinstance(check, dict):
+        assert False, "decode.field_table did not return a dict: %r" % check
+    compare_dicts(data, check, 'decode.field_table')
 
 # -- Encoding Tests --
 
@@ -351,6 +433,14 @@ def test_encode_short():
         assert False, "Encoded value does not match check value: %r" % value
 
 
+def test_encode_integer_error():
+    try:
+        codec.encode._encode_integer(9223372036854775808)
+    except ValueError:
+        return
+    assert False, "encode._encode_integer did not raise a ValueError Exception"
+
+
 def test_encode_short_error():
     try:
         codec.encode.short_int(32768)
@@ -364,6 +454,15 @@ def test_encode_long_string():
     value = codec.encode.long_string("0123456789")
     if value != check:
         assert False, "Encoded value does not match check value: %r" % value
+
+
+def test_encode_long_string_error():
+    try:
+        codec.encode.long_string(100)
+    except ValueError:
+        return
+    assert False, "encode.long_string failed to raise a ValueError Exception"
+
 
 def test_encode_short_string():
     check = 's\n0123456789'
@@ -471,5 +570,21 @@ boolvalt\x01\x06strvals\x04Test\x06intvalU\x00\x01\x0ctimestampvalT\x00\x00\
     if value != check:
         assert False, "Encoded value does not match check value: %r" % value
 
-
-# -
+def test_encode_value_large_str():
+    check = ('S\x00\x00\x03\x1601234567891011121314151617181920212223242526272'
+             '8293031323334353637383940414243444546474849505152535455565758596'
+             '0616263646566676869707172737475767778798081828384858687888990919'
+             '2939495969798991001011021031041051061071081091101111121131141151'
+             '1611711811912012112212312412512612712812913013113213313413513613'
+             '7138139140141142143144145146147148149150151152153154155156157158'
+             '1591601611621631641651661671681691701711721731741751761771781791'
+             '8018118218318418518618718818919019119219319419519619719819920020'
+             '1202203204205206207208209210211212213214215216217218219220221222'
+             '2232242252262272282292302312322332342352362372382392402412422432'
+             '4424524624724824925025125225325425525625725825926026126226326426'
+             '5266267268269270271272273274275276277278279280281282283284285286'
+             '287288289290291292293294295296297298299')
+    data = ''.join([str(position) for position in range(300)])
+    value = codec.encode._encode_value(data)
+    if value != check:
+        assert False, "Encoded value does not match check value: %r" % value
