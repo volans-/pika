@@ -242,31 +242,5 @@ class MethodFrame(object):
         self.method_class = amqp.INDEX_MAPPING[method_index]
         self.frame = self.method_class()
 
-        # If we were passed data, decode it
-        if data_in:
-            self._decode(data_in)
-
-    def encode(self):
-        pass
-        #return struct.pack('>BHI',
-        #                   self.frame_type,
-        #                   self.channel_number,
-        #                   len(payload)) + payload + chr(spec.FRAME_END)
-
-    def _decode(self, data_in):
-        """Decodes data applying the data in order as specified in the amqp
-        class/method definition.
-
-        :param data_in: Raw byte stream data.
-        :type data_in: unicode.
-        """
-        for key in self.method_class.arguments:
-            offset, val = codec.decode.decode_by_type(data_in,
-                                                      getattr(self.method_class,
-                                                              key))
-            data_in = data_in[offset:]
-            setattr(self.frame, key, val)
-
-
 class HeaderFrame(object):
     pass
