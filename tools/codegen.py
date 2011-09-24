@@ -37,7 +37,7 @@ output = []
 def new_line(text='', indent=0):
     """Append a new line to the output buffer"""
     global output
-    output.append(''.join([' ' for x in xrange(0, indent)]) + text)
+    output.append(''.join([' ' for x in range(indent)]) + text)
 
 
 def classify(text):
@@ -242,11 +242,10 @@ def new_function(function_name, arguments, indent=0):
     definition = 'def %s(%s):' % (function_name, ', '.join(args))
 
     # Build the output of it with wrapping
-    lines = wrap(''.join([' ' for x in xrange(0, indent)]) + definition, 79,
+    lines = wrap(''.join([' ' for x in range(indent)]) + definition, 79,
                  subsequent_indent=\
-                    ''.join([' ' for x in xrange(0,
-                                                 indent + \
-                                                 len(function_name) + 5)]))
+                    ''.join([' ' for x in range(indent +
+                                                len(function_name) + 5)]))
     for line in lines:
         new_line(line)
 
@@ -663,10 +662,10 @@ for amqp_class in amqp['classes']:
     if amqp_class['name'] not in CODEGEN_IGNORE_CLASSES:
         for method in amqp_class['methods']:
             key = amqp_class['id'] << 16 | method['id']
-            mapping.append(('                 0x%08X: %s.%s,' % \
-                           (key,
-                            pep8_class_name(amqp_class['name']),
-                            pep8_class_name(method['name']))))
+            mapping.append(('                 0x%08X: %s.%s,' %
+                            (key,
+                             pep8_class_name(amqp_class['name']),
+                             pep8_class_name(method['name']))))
 mapping[0] = mapping[0].replace('                 ',
                                 'INDEX_MAPPING = {')
 mapping[-1] = mapping[-1].replace(',', '}')
