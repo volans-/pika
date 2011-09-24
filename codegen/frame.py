@@ -8,10 +8,6 @@ class Frame(object):
     id = 0
     index = 0
 
-    @property
-    def name(self):
-        return self.__class__.__name__
-
     def demarshal(self, data):
         """
         Dynamically decode the frame data applying the values to the method

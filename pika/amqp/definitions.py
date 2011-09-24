@@ -81,10 +81,6 @@ class Frame(object):
     id = 0
     index = 0
 
-    @property
-    def name(self):
-        return self.__class__.__name__
-
     def demarshal(self, data):
         """
         Dynamically decode the frame data applying the values to the method
@@ -347,6 +343,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x000A000A
+        name = 'Connection.Start'
 
         # AMQP Method Arguments
         arguments = ["version_major",
@@ -409,6 +406,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x000A000B
+        name = 'Connection.StartOk'
 
         # AMQP Method Arguments
         arguments = ["client_properties",
@@ -462,6 +460,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 20
         index = 0x000A0014
+        name = 'Connection.Secure'
 
         # AMQP Method Arguments
         arguments = ["challenge"]
@@ -495,6 +494,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 21
         index = 0x000A0015
+        name = 'Connection.SecureOk'
 
         # AMQP Method Arguments
         arguments = ["response"]
@@ -525,6 +525,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 30
         index = 0x000A001E
+        name = 'Connection.Tune'
 
         # AMQP Method Arguments
         arguments = ["channel_max",
@@ -573,6 +574,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 31
         index = 0x000A001F
+        name = 'Connection.TuneOk'
 
         # AMQP Method Arguments
         arguments = ["channel_max",
@@ -620,6 +622,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 40
         index = 0x000A0028
+        name = 'Connection.Open'
 
         # AMQP Method Arguments
         arguments = ["virtual_host",
@@ -666,6 +669,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 41
         index = 0x000A0029
+        name = 'Connection.OpenOk'
 
         # AMQP Method Arguments
         arguments = ["known_hosts"]
@@ -699,6 +703,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 50
         index = 0x000A0032
+        name = 'Connection.Close'
 
         # AMQP Method Arguments
         arguments = ["reply_code",
@@ -755,6 +760,7 @@ class Connection(object):
         # AMQP Method Number and Mapping Index
         id = 51
         index = 0x000A0033
+        name = 'Connection.CloseOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -787,6 +793,7 @@ class Channel(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x0014000A
+        name = 'Channel.Open'
 
         # AMQP Method Arguments
         arguments = ["out_of_band"]
@@ -819,6 +826,7 @@ class Channel(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x0014000B
+        name = 'Channel.OpenOk'
 
         # AMQP Method Arguments
         arguments = ["channel_id"]
@@ -853,6 +861,7 @@ class Channel(object):
         # AMQP Method Number and Mapping Index
         id = 20
         index = 0x00140014
+        name = 'Channel.Flow'
 
         # AMQP Method Arguments
         arguments = ["active"]
@@ -885,6 +894,7 @@ class Channel(object):
         # AMQP Method Number and Mapping Index
         id = 21
         index = 0x00140015
+        name = 'Channel.FlowOk'
 
         # AMQP Method Arguments
         arguments = ["active"]
@@ -918,6 +928,7 @@ class Channel(object):
         # AMQP Method Number and Mapping Index
         id = 40
         index = 0x00140028
+        name = 'Channel.Close'
 
         # AMQP Method Arguments
         arguments = ["reply_code",
@@ -973,6 +984,7 @@ class Channel(object):
         # AMQP Method Number and Mapping Index
         id = 41
         index = 0x00140029
+        name = 'Channel.CloseOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1007,6 +1019,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x0028000A
+        name = 'Exchange.Declare'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1097,6 +1110,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x0028000B
+        name = 'Exchange.DeclareOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1118,6 +1132,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 20
         index = 0x00280014
+        name = 'Exchange.Delete'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1171,6 +1186,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 21
         index = 0x00280015
+        name = 'Exchange.DeleteOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1191,6 +1207,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 30
         index = 0x0028001E
+        name = 'Exchange.Bind'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1259,6 +1276,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 31
         index = 0x0028001F
+        name = 'Exchange.BindOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1279,6 +1297,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 40
         index = 0x00280028
+        name = 'Exchange.Unbind'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1345,6 +1364,7 @@ class Exchange(object):
         # AMQP Method Number and Mapping Index
         id = 51
         index = 0x00280033
+        name = 'Exchange.UnbindOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1380,6 +1400,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x0032000A
+        name = 'Queue.Declare'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1463,6 +1484,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x0032000B
+        name = 'Queue.DeclareOk'
 
         # AMQP Method Arguments
         arguments = ["queue",
@@ -1509,6 +1531,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 20
         index = 0x00320014
+        name = 'Queue.Bind'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1576,6 +1599,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 21
         index = 0x00320015
+        name = 'Queue.BindOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1597,6 +1621,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 30
         index = 0x0032001E
+        name = 'Queue.Purge'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1642,6 +1667,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 31
         index = 0x0032001F
+        name = 'Queue.PurgeOk'
 
         # AMQP Method Arguments
         arguments = ["message_count"]
@@ -1672,6 +1698,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 40
         index = 0x00320028
+        name = 'Queue.Delete'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1732,6 +1759,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 41
         index = 0x00320029
+        name = 'Queue.DeleteOk'
 
         # AMQP Method Arguments
         arguments = ["message_count"]
@@ -1760,6 +1788,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 50
         index = 0x00320032
+        name = 'Queue.Unbind'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -1819,6 +1848,7 @@ class Queue(object):
         # AMQP Method Number and Mapping Index
         id = 51
         index = 0x00320033
+        name = 'Queue.UnbindOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1856,6 +1886,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x003C000A
+        name = 'Basic.Qos'
 
         # AMQP Method Arguments
         arguments = ["prefetch_size",
@@ -1904,6 +1935,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x003C000B
+        name = 'Basic.QosOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -1926,6 +1958,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 20
         index = 0x003C0014
+        name = 'Basic.Consume'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -2008,6 +2041,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 21
         index = 0x003C0015
+        name = 'Basic.ConsumeOk'
 
         # AMQP Method Arguments
         arguments = ["consumer_tag"]
@@ -2048,6 +2082,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 30
         index = 0x003C001E
+        name = 'Basic.Cancel'
 
         # AMQP Method Arguments
         arguments = ["consumer_tag",
@@ -2087,6 +2122,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 31
         index = 0x003C001F
+        name = 'Basic.CancelOk'
 
         # AMQP Method Arguments
         arguments = ["consumer_tag"]
@@ -2119,6 +2155,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 40
         index = 0x003C0028
+        name = 'Basic.Publish'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -2179,6 +2216,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 50
         index = 0x003C0032
+        name = 'Basic.Return'
 
         # AMQP Method Arguments
         arguments = ["reply_code",
@@ -2232,6 +2270,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 60
         index = 0x003C003C
+        name = 'Basic.Deliver'
 
         # AMQP Method Arguments
         arguments = ["consumer_tag",
@@ -2291,6 +2330,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 70
         index = 0x003C0046
+        name = 'Basic.Get'
 
         # AMQP Method Arguments
         arguments = ["ticket",
@@ -2338,6 +2378,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 71
         index = 0x003C0047
+        name = 'Basic.GetOk'
 
         # AMQP Method Arguments
         arguments = ["delivery_tag",
@@ -2396,6 +2437,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 72
         index = 0x003C0048
+        name = 'Basic.GetEmpty'
 
         # AMQP Method Arguments
         arguments = ["cluster_id"]
@@ -2430,6 +2472,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 80
         index = 0x003C0050
+        name = 'Basic.Ack'
 
         # AMQP Method Arguments
         arguments = ["delivery_tag",
@@ -2468,6 +2511,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 90
         index = 0x003C005A
+        name = 'Basic.Reject'
 
         # AMQP Method Arguments
         arguments = ["delivery_tag",
@@ -2506,6 +2550,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 100
         index = 0x003C0064
+        name = 'Basic.RecoverAsync'
 
         # AMQP Method Arguments
         arguments = ["requeue"]
@@ -2542,6 +2587,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 110
         index = 0x003C006E
+        name = 'Basic.Recover'
 
         # AMQP Method Arguments
         arguments = ["requeue"]
@@ -2571,6 +2617,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 111
         index = 0x003C006F
+        name = 'Basic.RecoverOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -2596,6 +2643,7 @@ class Basic(object):
         # AMQP Method Number and Mapping Index
         id = 120
         index = 0x003C0078
+        name = 'Basic.Nack'
 
         # AMQP Method Arguments
         arguments = ["delivery_tag",
@@ -2743,6 +2791,7 @@ class Tx(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x005A000A
+        name = 'Tx.Select'
 
         # AMQP Method Arguments
         arguments = []
@@ -2767,6 +2816,7 @@ class Tx(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x005A000B
+        name = 'Tx.SelectOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -2789,6 +2839,7 @@ class Tx(object):
         # AMQP Method Number and Mapping Index
         id = 20
         index = 0x005A0014
+        name = 'Tx.Commit'
 
         # AMQP Method Arguments
         arguments = []
@@ -2813,6 +2864,7 @@ class Tx(object):
         # AMQP Method Number and Mapping Index
         id = 21
         index = 0x005A0015
+        name = 'Tx.CommitOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -2837,6 +2889,7 @@ class Tx(object):
         # AMQP Method Number and Mapping Index
         id = 30
         index = 0x005A001E
+        name = 'Tx.Rollback'
 
         # AMQP Method Arguments
         arguments = []
@@ -2861,6 +2914,7 @@ class Tx(object):
         # AMQP Method Number and Mapping Index
         id = 31
         index = 0x005A001F
+        name = 'Tx.RollbackOk'
 
         # AMQP Method Arguments
         arguments = []
@@ -2905,6 +2959,7 @@ class Confirm(object):
         # AMQP Method Number and Mapping Index
         id = 10
         index = 0x0055000A
+        name = 'Confirm.Select'
 
         # AMQP Method Arguments
         arguments = ["nowait"]
@@ -2938,6 +2993,7 @@ class Confirm(object):
         # AMQP Method Number and Mapping Index
         id = 11
         index = 0x0055000B
+        name = 'Confirm.SelectOk'
 
         # AMQP Method Arguments
         arguments = []

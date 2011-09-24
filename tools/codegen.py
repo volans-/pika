@@ -506,6 +506,8 @@ for class_name in class_list:
         new_line('id = %i' % method['id'], indent)
         new_line('index = 0x%08X' % (definition['id'] << 16 | method['id']),
                  indent)
+        new_line('name = \'%s.%s\'' % (pep8_class_name(class_name),
+                                       pep8_class_name(method['name'])), indent)
         new_line()
 
         comment("AMQP Method Arguments", indent)
