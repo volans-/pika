@@ -8,7 +8,7 @@ __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-04-10'
 
-import amqp
+from amqp import definitions as amqp
 import codec
 import struct
 

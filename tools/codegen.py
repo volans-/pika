@@ -11,11 +11,10 @@ CODEGEN_DIR = 'rabbitmq-codegen-default'
 CODEGEN_IGNORE_CLASSES = ['access']
 CODEGEN_JSON = 'amqp-rabbitmq-0.9.1.json'
 CODEGEN_XML = 'amqp0-9-1.xml'
-CODEGEN_OUTPUT = '../pika/amqp.py'
-CODEGEN_JSON_URL = \
-    'http://hg.rabbitmq.com/rabbitmq-codegen/archive/default.tar.bz2'
-CODEGEN_XML_URL = \
-    'http://www.rabbitmq.com/resources/specs/amqp0-9-1.xml'
+CODEGEN_OUTPUT = '../pika/amqp/definitions.py'
+CODEGEN_JSON_URL = ('http://hg.rabbitmq.com'
+                    '/rabbitmq-codegen/archive/default.tar.bz2')
+CODEGEN_XML_URL = 'http://www.rabbitmq.com/resources/specs/amqp0-9-1.xml'
 
 XPATH_ORDER = ['class', 'constant', 'method', 'field']
 
@@ -116,8 +115,8 @@ def get_documentation(search_path):
                          for line in
                              node[0].text.split('\n')]).strip()
 
-    print 'Doc couldnt find %r' % search_path
-    print '%s/doc' % '/'.join(search)
+    #print 'Doc couldnt find %r' % search_path
+    #print '%s/doc' % '/'.join(search)
     # Not found, return None
     return None
 
@@ -321,6 +320,8 @@ new_line()
 new_line('__date__ = "%s"' % date.today().isoformat())
 new_line('__author__ = "%s"' % __file__)
 new_line()
+new_line('from . import method')
+new_line()
 
 # AMQP Version Header
 comment("AMQP Protocol Version")
@@ -474,7 +475,8 @@ for class_name in class_list:
     # Build the list of methods
     methods = list()
     for method in definition['methods']:
-        new_line('class %s(object):' % pep8_class_name(method['name']), indent)
+        new_line('class %s(method.Method):' %
+                 pep8_class_name(method['name']), indent)
         indent += 4
 
         # No Confirm in AMQP spec

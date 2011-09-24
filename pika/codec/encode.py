@@ -28,7 +28,7 @@ def boolean(value):
     """
     if not isinstance(value, bool):
         raise ValueError("bool type required")
-    return struct.pack('>cB', 't', int(value))
+    return struct.pack('>B', int(value))
 
 
 def decimal(value):
@@ -45,9 +45,9 @@ def decimal(value):
     if value._exp < 0:
         decimals = -value._exp
         raw = int(value * (_decimal.Decimal(10) ** decimals))
-        return struct.pack('>cBi', 'D', decimals, raw)
+        return struct.pack('>Bi', decimals, raw)
     # per spec, the "decimal.Decimals" octet is unsigned (!)
-    return struct.pack('>cBi', 'D', 0, int(value))
+    return struct.pack('>Bi', 0, int(value))
 
 
 def floating_point(value):
@@ -60,7 +60,7 @@ def floating_point(value):
     """
     if not isinstance(value, float):
         raise ValueError("float type required")
-    return struct.pack('>cf', 'f',  value)
+    return struct.pack('>f', value)
 
 
 def long_int(value):
@@ -75,7 +75,7 @@ def long_int(value):
         raise ValueError("int or long type required")
     if value < -2147483648 or value > 2147483647:
         raise ValueError("Long integer range: -2147483648 to 2147483647")
-    return struct.pack('>cl', 'I', value)
+    return struct.pack('>l', value)
 
 
 def long_long_int(value):
@@ -91,7 +91,7 @@ def long_long_int(value):
     if value < -9223372036854775808 or value > 9223372036854775807:
         raise ValueError("long-long integer range: \
 -9223372036854775808 to 9223372036854775807")
-    return struct.pack('>cq', 'L', value)
+    return struct.pack('>q', value)
 
 
 def long_string(value):
@@ -104,7 +104,7 @@ def long_string(value):
     """
     if not isinstance(value, basestring):
         raise ValueError("str or unicode type required")
-    return struct.pack('>cI', 'S', len(value)) + value
+    return struct.pack('>I', len(value)) + value
 
 
 def short_int(value):
@@ -119,7 +119,7 @@ def short_int(value):
         raise ValueError("int type required")
     if value < -32768 or value > 32767:
         raise ValueError("Short range: -32768 to 32767")
-    return struct.pack('>ch', 'U', value)
+    return struct.pack('>h', value)
 
 
 def short_string(value):
@@ -132,7 +132,7 @@ def short_string(value):
     """
     if not isinstance(value, basestring):
         raise ValueError("str or unicode type required")
-    return struct.pack('>cB', 's', len(value)) + value
+    return struct.pack('>B', len(value)) + value
 
 
 def timestamp(value):
@@ -146,7 +146,7 @@ def timestamp(value):
     if isinstance(value, datetime.datetime):
         value = value.timetuple()
     if isinstance(value, time.struct_time):
-        return struct.pack('>cQ', 'T', calendar.timegm(value))
+        return struct.pack('>Q', calendar.timegm(value))
     raise ValueError("datetime.datetime or time.struct_time type required")
 
 
@@ -163,10 +163,10 @@ def field_array(value):
 
     data = list()
     for item in value:
-        data.append(_encode_value(item))
+        data.append(encode_table_value(item))
 
     output = ''.join(data)
-    return struct.pack('>cI', 'A', len(output)) + output
+    return struct.pack('>I', len(output)) + output
 
 
 def field_table(value):
@@ -191,16 +191,16 @@ def field_table(value):
         data.append(struct.pack('B', len(key)))
         data.append(key)
         try:
-            data.append(_encode_value(value[key]))
+            data.append(encode_table_value(value[key]))
         except ValueError as err:
             raise ValueError("%s error: %s", key, err)
 
     # Join all of the data together as a string
     output = ''.join(data)
-    return struct.pack('>cI', 'F', len(output)) + output
+    return struct.pack('>I', len(output)) + output
 
 
-def _encode_integer(value):
+def table_integer(value):
     """Determines the best type of numeric type to encode value as, preferring
     the smallest data size first.
 
@@ -211,11 +211,11 @@ def _encode_integer(value):
     """
     # Send the appropriately sized data value
     if -32768 < value < 32767:
-        result = short_int(int(value))
+        return 'U' + short_int(int(value))
     elif -2147483648 < value < 2147483647:
-        result = long_int(long(value))
+        result = 'I' + long_int(long(value))
     elif -9223372036854775808 < value < 9223372036854775807:
-        result = long_long_int(long(value))
+        result = 'L' + long_long_int(long(value))
     else:
         raise ValueError("Numeric value exceeds long-long-int max: %r",
                          value)
@@ -224,7 +224,7 @@ def _encode_integer(value):
     return result
 
 
-def _encode_value(value):
+def encode_table_value(value):
     """Takes a value of any type and tries to encode it with the proper encoder.
 
     :param value: Value to encode.
@@ -234,27 +234,60 @@ def _encode_value(value):
     """
     # Determine the field type and encode it
     if isinstance(value, bool):
-        result = boolean(value)
+        result = 't' + boolean(value)
     elif isinstance(value, int) or isinstance(value, long):
-        result = _encode_integer(value)
+        result = table_integer(value)
     elif isinstance(value, _decimal.Decimal):
-        result = decimal(value)
+        result = 'D' + decimal(value)
     elif isinstance(value, float):
-        result = floating_point(value)
+        result = 'f' + floating_point(value)
     elif isinstance(value, basestring):
         if len(value) < 255:
-            result = short_string(value)
+            result = 's' + short_string(value)
         else:
-            result = long_string(value)
-    elif isinstance(value, datetime.datetime) or isinstance(value,
-                                                            time.struct_time):
-        result = timestamp(value)
+            result = 'S' + long_string(value)
+    elif (isinstance(value, datetime.datetime) or
+         isinstance(value, time.struct_time)):
+        result = 'T' + timestamp(value)
     elif isinstance(value, dict):
-        result = field_table(value)
+        result = 'F' + field_table(value)
     elif isinstance(value, list):
-        result = field_array(value)
+        result = 'A' + field_array(value)
     else:
         raise ValueError("Unknown type: %s (%r)", type(value), value)
 
     # Return the encoded value
     return result
+
+def by_type(value, data_type):
+    """Takes a value of any type and tries to encode it with the specified
+    encoder.
+
+    :param value: Value to encode.
+    :type value: mixed.
+    :param data_type: type of data to encode
+    :type data_type: str.
+    :returns: str.
+
+    """
+    # Determine the field type and encode it
+    if data_type == 'bit':
+        return boolean(value)
+    elif data_type == 'field_array':
+        return field_array(value)
+    elif data_type == 'long':
+        return long_int(value)
+    elif data_type == 'longlong':
+        return long_long_int(value)
+    elif data_type == 'longstr':
+        return long_string(value)
+    elif data_type == 'short':
+        return short_int(value)
+    elif data_type == 'shortstr':
+        return short_string(value)
+    elif data_type == 'table':
+        return field_table(value)
+    elif data_type == 'timestamp':
+        return timestamp(value)
+    else:
+        raise ValueError("Unknown type: %s", value)

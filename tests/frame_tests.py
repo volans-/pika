@@ -9,8 +9,8 @@ __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-04-10'
 
 import test_support
-import pika.amqp as amqp
-import pika.frame as frame
+from pika.amqp import definitions as amqp
+from pika import frame
 
 
 def validate_method_frame(frame_handle, method):
@@ -82,6 +82,7 @@ def decode_connection_open_test():
     validate_attribute(test, 'insist', bool, True)
     validate_attribute(test, 'capabilities', str, '')
     validate_attribute(test, 'virtual_host', str, '/')
+
 
 def decode_connection_tuneok_test():
 
