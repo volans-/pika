@@ -9,7 +9,7 @@ For copyright and licensing please refer to COPYING.
 """
 
 __date__ = "2011-09-24"
-__author__ = "./codegen.py"
+__author__ = "codegen.py"
 
 from pika import codec
 
@@ -80,6 +80,7 @@ class Frame(object):
     arguments = list()
     id = 0
     index = 0
+    name = 'Frame'
 
     def demarshal(self, data):
         """
@@ -112,6 +113,37 @@ class Frame(object):
                                                getattr(self.__class__,
                                                        argument)))
         return u''.join(output)
+
+
+class PropertiesBase(object):
+    """Provide a base object that marshals and demarshals the Basic.Properties
+    object values.
+
+    """
+
+    attributes = list()
+    flags = dict()
+    name = 'PropertiesBase'
+
+    def demarshal(self, flags, data):
+        """
+        Dynamically decode the frame data applying the values to the method
+        object by iterating through the attributes in order and decoding them.
+
+        :param flags: Flags that indicate if the data has the given property
+        :type flags: int
+        :param data: The binary encoded method data
+        :type data: unicode
+
+        """
+        flag_values = getattr(self.__class__, 'flags')
+        for attribute in self.attributes:
+            if flags & flag_values[attribute]:
+                attribute = attribute.replace('-', '_')
+                data_type = getattr(self.__class__, attribute)
+                consumed, value = codec.decode.by_type(data, data_type)
+                setattr(self, attribute, value)
+                data = data[consumed:]
 
 
 # AMQP Errors
@@ -2678,8 +2710,58 @@ class Basic(object):
             # Requeue the message
             self.requeue = requeue
 
-    class Properties(Frame):
+    class Properties(PropertiesBase):
         """Content Properties"""
+
+        name = 'Basic.Properties'
+
+        # Attributes
+        attributes = ["content-type",
+                      "content-encoding",
+                      "headers",
+                      "delivery-mode",
+                      "priority",
+                      "correlation-id",
+                      "reply-to",
+                      "expiration",
+                      "message-id",
+                      "timestamp",
+                      "type",
+                      "user-id",
+                      "app-id",
+                      "cluster-id"]
+
+        # Flag Values
+        flags = {"content-type": 32768,
+                 "content-encoding": 16384,
+                 "headers": 8192,
+                 "delivery-mode": 4096,
+                 "priority": 2048,
+                 "correlation-id": 1024,
+                 "reply-to": 512,
+                 "expiration": 256,
+                 "message-id": 128,
+                 "timestamp": 64,
+                 "type": 32,
+                 "user-id": 16,
+                 "app-id": 8,
+                 "cluster-id": 4}
+
+        # Class Attribute Types
+        content_type = "shortstr"
+        content_encoding = "shortstr"
+        headers = "table"
+        delivery_mode = "octet"
+        priority = "octet"
+        correlation_id = "shortstr"
+        reply_to = "shortstr"
+        expiration = "shortstr"
+        message_id = "shortstr"
+        timestamp = "timestamp"
+        type = "shortstr"
+        user_id = "shortstr"
+        app_id = "shortstr"
+        cluster_id = "shortstr"
 
         def __init__(self, content_type=None, content_encoding=None,
                      headers=None, delivery_mode=None, priority=None,
@@ -2689,33 +2771,33 @@ class Basic(object):
             """Initialize the Basic.Properties class
 
             :param content_type: MIME content type
-            :type content_type: unicode.
+            :type content_type: unicode
             :param content_encoding: MIME content encoding
-            :type content_encoding: unicode.
+            :type content_encoding: unicode
             :param headers: Message header field table
-            :type headers: dict.
+            :type headers: dict
             :param delivery_mode: Non-persistent (1) or persistent (2)
-            :type delivery_mode: int.
+            :type delivery_mode: int
             :param priority: Message priority, 0 to 9
-            :type priority: int.
+            :type priority: int
             :param correlation_id: Application correlation identifier
-            :type correlation_id: unicode.
+            :type correlation_id: unicode
             :param reply_to: Address to reply to
-            :type reply_to: unicode.
+            :type reply_to: unicode
             :param expiration: Message expiration specification
-            :type expiration: unicode.
+            :type expiration: unicode
             :param message_id: Application message identifier
-            :type message_id: unicode.
+            :type message_id: unicode
             :param timestamp: Message timestamp
-            :type timestamp: struct_time.
+            :type timestamp: struct_time
             :param type: Message type name
-            :type type: unicode.
+            :type type: unicode
             :param user_id: Creating user id
-            :type user_id: unicode.
+            :type user_id: unicode
             :param app_id: Creating application id
-            :type app_id: unicode.
+            :type app_id: unicode
             :param cluster_id: Deprecated
-            :type cluster_id: unicode.
+            :type cluster_id: unicode
 
             """
 
