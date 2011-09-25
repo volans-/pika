@@ -5,7 +5,7 @@
 # ***** END LICENSE BLOCK *****
 
 """
-frame.py
+Manage the marshalling and demarshalling of AMQP frames
 
 """
 
@@ -21,8 +21,8 @@ from . import header
 from pika import codec
 
 
-_CONTENT_FRAME_HEADER_SIZE = 7
-_CONTENT_FRAME_END_SIZE = 1
+_FRAME_HEADER_SIZE = 7
+_FRAME_END_SIZE = 1
 
 _DEMARSHALLING_FAILURE = 0, 0, None
 _LOGGER = logging.getLogger('pika.amqp.frame')
@@ -40,9 +40,9 @@ def demarshal(data_in):
     """
     # Look to see if it's a protocol header frame
     try:
-        consumed, frame = _demarshal_protocol_header_frame(data_in)
-        if consumed:
-            return consumed, 0, frame
+        frame = _demarshal_protocol_header_frame(data_in)
+        if frame:
+            return 8, 0, frame
     except ValueError:
         _LOGGER.warning('Demarshalling error processing a ProtocolHeader '
                         'frame: %r', data_in)
@@ -50,18 +50,21 @@ def demarshal(data_in):
         return _DEMARSHALLING_FAILURE
 
     # split the data into parts
-    frame_data = data_in.split(unichr(definitions.AMQP_FRAME_END))[0]
+    frame_data = data_in.split(unichr(definitions.AMQP_FRAME_END))[0].encode('utf-8')
 
     # How much data we should consume
-    bytes_consumed = len(frame_data) + 1
+    bytes_consumed = len(frame_data)
+    print repr(frame_data)
 
     # The lengths should not match, the frame end byte should be gone
-    if (bytes_consumed - 1) == len(data_in):
-        return _DEMARSHALLING_FAILURE
+    #if (bytes_consumed - 1) == len(data_in):
+    #    return _DEMARSHALLING_FAILURE
 
     # Decode the low level frame and break it into parts
     try:
-        frame_type, channel, frame_data = _frame_parts(frame_data)
+        frame_type, channel, frame_size = _frame_parts(frame_data)
+        last_byte = _FRAME_HEADER_SIZE + frame_size + 1
+        frame_data = frame_data[_FRAME_HEADER_SIZE:last_byte]
     except ValueError:
         _LOGGER.warning('Demarshalling error processing a content frame: %r',
                         data_in)
@@ -70,9 +73,8 @@ def demarshal(data_in):
     if frame_type == definitions.AMQP_FRAME_METHOD:
         return bytes_consumed, channel, _demarshal_method_frame(frame_data)
 
-
-    #elif frame_type == amqp.AMQP_FRAME_HEADER:
-    #    return decode_header_frame(channel, data, frame_end)
+    elif frame_type == definitions.AMQP_FRAME_HEADER:
+        return bytes_consumed, channel, _demarshal_header_frame(frame_data)
 
     #elif frame_type == amqp.AMQP_FRAME_BODY:
     #    consumed, frame_obj = decode_body_frame(channel, data, frame_end)
@@ -93,18 +95,18 @@ def _demarshal_protocol_header_frame(data_in):
 
     :param data_in: Raw byte stream data
     :type data_in: unicode
-    :returns: tuple of bytes consumed and frame object
+    :returns: header.ProtocolHeader
     :raises: ValueError
 
     """
     # Do the first four bytes not match?
     if data_in[0:4] != 'AMQP':
-        return 0, None
+        return None
 
     try:
         frame = header.ProtocolHeader()
-        bytes_consumed = frame.demarshal(data_in)
-        return bytes_consumed, frame
+        frame.demarshal(data_in)
+        return frame
     except IndexError:
         # We didn't get a full frame
         raise ValueError('Frame data did not meet minimum length requirements')
@@ -131,6 +133,19 @@ def _demarshal_method_frame(frame_data):
     return method
 
 
+def _demarshal_header_frame(frame_data):
+    """Attempt to demarshal a header frame
+
+    :param frame_data: Raw frame data to assign to our header frame
+    :type frame_data: unicode
+    :returns: tuple of the amount of data consumed and the frame object
+
+    """
+    content_header = header.ContentHeader()
+    content_header.demarshal(frame_data)
+    return content_header
+
+
 def _frame_parts(data_in):
     """Try and decode a low-level AMQP frame and return the parts of the frame.
 
@@ -143,16 +158,8 @@ def _frame_parts(data_in):
     """
     # Get the Frame Type, Channel Number and Frame Size
     try:
-        (frame_type,
-         channel_number,
-         frame_size) = struct.unpack('>BHL',
-                                     data_in[0:_CONTENT_FRAME_HEADER_SIZE])
+        return struct.unpack('>BHL', data_in[0:_FRAME_HEADER_SIZE])
     except struct.error:
         # We didn't get a full frame
         return _DEMARSHALLING_FAILURE
-
-    # Return the values, including the raw frame data
-    return (frame_type,
-            channel_number,
-            data_in[_CONTENT_FRAME_HEADER_SIZE:])
 

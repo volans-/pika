@@ -88,7 +88,7 @@ def long_string(value):
 
     """
     length = struct.unpack_from('>I', value)[0]
-    return length + 4, value[4:length + 4]
+    return length + 4, unicode(value[4:length + 4])
 
 
 def octet(value):
@@ -110,7 +110,7 @@ def short_int(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 2, struct.unpack_from('>h', value)[0]
+    return 2, struct.unpack_from('>H', value)[0]
 
 
 def short_string(value):
@@ -122,7 +122,7 @@ def short_string(value):
 
     """
     length = struct.unpack_from('>B', value)[0]
-    return length + 1, value[1:length + 1]
+    return length + 1, unicode(value[1:length + 1])
 
 
 def timestamp(value):
