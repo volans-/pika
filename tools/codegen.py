@@ -17,7 +17,7 @@ CODEGEN_JSON_URL = ('http://hg.rabbitmq.com'
 CODEGEN_XML_URL = 'http://www.rabbitmq.com/resources/specs/amqp0-9-1.xml'
 
 XPATH_ORDER = ['class', 'constant', 'method', 'field']
-PREPEND = [CODEGEN_DIR + 'frame.py']
+PREPEND = [CODEGEN_DIR + 'include.py']
 
 from datetime import date
 from json import load
@@ -621,9 +621,41 @@ for class_name in class_list:
         indent -= 8
 
     if 'properties' in definition and definition['properties']:
-        new_line('class Properties(Frame):', indent)
+        new_line('class Properties(PropertiesBase):', indent)
         indent += 4
         comment('"""Content Properties"""', indent, '')
+        new_line()
+
+        new_line('name = \'%s.Properties\'' % pep8_class_name(class_name),
+                 indent)
+        new_line()
+
+        comment("Attributes", indent)
+        new_line('attributes = ["%s",' % definition['properties'][0]['name'],
+                 indent)
+        for argument in definition['properties'][1:-1]:
+            new_line('"%s",' % argument['name'], indent + 14)
+        new_line('"%s"]' % definition['properties'][-1]['name'], indent + 14)
+        new_line()
+
+        comment("Flag Values", indent)
+        flag_value = 15
+        new_line('flags = {"%s": %i,' %
+                 (definition['properties'][0]['name'], 1 << flag_value), indent)
+        for argument in definition['properties'][1:-1]:
+            flag_value -= 1
+            new_line('"%s": %i,' %
+                     (argument['name'], 1 << flag_value), indent + 9),
+        flag_value -= 1
+        new_line('"%s": %i}' % (definition['properties'][-1]['name'],
+                                1 << flag_value), indent + 9)
+        new_line()
+
+        comment("Class Attribute Types", indent)
+        for argument in definition['properties']:
+            new_line('%s = "%s"' % (argument_name(argument['name']),
+                                    get_argument_type(argument)),
+                     indent)
         new_line()
 
         # Function definition
@@ -643,7 +675,7 @@ for class_name in class_list:
                 line = ':param %s: %s' % (name, label)
                 new_line(line.strip(), indent)
 
-            new_line(':type %s: %s.' % (name, get_argument_type_doc(argument)),
+            new_line(':type %s: %s' % (name, get_argument_type_doc(argument)),
                      indent)
 
         new_line()
