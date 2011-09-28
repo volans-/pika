@@ -87,8 +87,7 @@ class Frame(object):
         Dynamically decode the frame data applying the values to the method
         object by iterating through the attributes in order and decoding them.
 
-        :param data: The binary encoded method data
-        :type data: str
+        :param str data: The binary encoded method data
 
         """
         offset = 0
@@ -122,7 +121,7 @@ class Frame(object):
         encode them item by item getting the value form the object attribute
         and the data type from the class attribute.
 
-        :returns: unicode
+        :returns: str
 
         """
         output = []
@@ -131,9 +130,6 @@ class Frame(object):
         offset = 0
         for argument in self.attributes:
             data_type = getattr(self.__class__, argument)
-
-            print 'Processings %s' % argument
-            print 'Data type: %s' % data_type
 
             # Check if we need to turn on bit processing
             if not processing_bitset and data_type == 'bit':
@@ -167,7 +163,6 @@ class Frame(object):
                     # Go to the next iteration
                     continue
 
-
             # Not a bit, so just process by type
             output.append(codec.encode.by_type(data_value, data_type))
 
@@ -175,10 +170,7 @@ class Frame(object):
         if processing_bitset:
             output.append(codec.encode.octet(byte))
 
-
-        print repr(output)
         return ''.join(output)
-
 
 
 class PropertiesBase(object):
