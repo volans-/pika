@@ -8,8 +8,6 @@ __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-04-10'
 
-import time
-
 import test_support
 from pika import amqp
 
@@ -97,8 +95,16 @@ def demarshal_basic_cancelok_test():
 
 
 def demarshal_basic_consume_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x18\x00<\x00\x14\x00\x00\x04test\x07ctag1.0\x00\x00\x00\x00\x00\xce'
-    expectation = {'exclusive': False, 'nowait': False, 'no_local': False, 'consumer_tag': 'ctag1.0', 'queue': 'test', 'arguments': {}, 'ticket': 0, 'no_ack': False}
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x18\x00<\x00\x14\x00\x00\x04test'
+                  '\x07ctag1.0\x00\x00\x00\x00\x00\xce')
+    expectation = {'exclusive': False,
+                   'nowait': False,
+                   'no_local': False,
+                   'consumer_tag': 'ctag1.0',
+                   'queue': 'test',
+                   'arguments': {},
+                   'ticket': 0,
+                   'no_ack': False}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -184,7 +190,8 @@ def demarshal_basic_deliver_test():
 
 
 def demarshal_basic_get_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x0c\x00<\x00F\x00\x00\x04test\x00\xce'
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x0c\x00<\x00F\x00\x00\x04test'
+                  '\x00\xce')
     expectation = {'queue': 'test', 'ticket': 0, 'no_ack': False}
 
     # Decode the frame and validate lengths
@@ -240,8 +247,13 @@ def demarshal_basic_publish_test():
 
 
 def demarshal_basic_getok_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x17\x00<\x00G\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x04test\x00\x00\x12\x06\xce'
-    expectation = {'message_count': 4614, 'redelivered': False, 'routing_key': 'test', 'delivery_tag': 16, 'exchange': ''}
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x17\x00<\x00G\x00\x00\x00\x00\x00'
+                  '\x00\x00\x10\x00\x00\x04test\x00\x00\x12\x06\xce')
+    expectation = {'message_count': 4614,
+                   'redelivered': False,
+                   'routing_key': 'test',
+                   'delivery_tag': 16,
+                   'exchange': ''}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -267,7 +279,8 @@ def demarshal_basic_getok_test():
 
 
 def demarshal_basic_qos_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x0b\x00<\x00\n\x00\x00\x00\x00\x00\x01\x00\xce'
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x0b\x00<\x00\n\x00\x00\x00\x00\x00'
+                  '\x01\x00\xce')
     expectation = {'prefetch_count': 1, 'prefetch_size': 0, 'global_': False}
 
     # Decode the frame and validate lengths
@@ -291,6 +304,7 @@ def demarshal_basic_qos_test():
 
     # Run the frame check, assertions contained within
     test_support.check_frame(frame, expectation)
+
 
 def demarshal_basic_qosok_test():
     frame_data = '\x01\x00\x01\x00\x00\x00\x04\x00<\x00\x0b\xce'
@@ -320,7 +334,8 @@ def demarshal_basic_qosok_test():
 
 
 def demarshal_basic_reject_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\r\x00<\x00Z\x00\x00\x00\x00\x00\x00\x00\x10\x01\xce'
+    frame_data = ('\x01\x00\x01\x00\x00\x00\r\x00<\x00Z\x00\x00\x00\x00\x00'
+                  '\x00\x00\x10\x01\xce')
     expectation = {'requeue': True, 'delivery_tag': 16}
 
     # Decode the frame and validate lengths
@@ -430,7 +445,8 @@ def demarshal_channel_open_test():
 
 
 def demarshal_channel_openok_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x08\x00\x14\x00\x0b\x00\x00\x00\x00\xce'
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x08\x00\x14\x00\x0b\x00\x00\x00'
+                  '\x00\xce')
     expectation = {'channel_id': ''}
 
     # Decode the frame and validate lengths
@@ -621,8 +637,33 @@ def demarshal_connection_openok_test():
 
 
 def demarshal_connection_start_test():
-    frame_data = '\x01\x00\x00\x00\x00\x01G\x00\n\x00\n\x00\t\x00\x00\x01"\x0ccapabilitiesF\x00\x00\x00X\x12publisher_confirmst\x01\x1aexchange_exchange_bindingst\x01\nbasic.nackt\x01\x16consumer_cancel_notifyt\x01\tcopyrightS\x00\x00\x00$Copyright (C) 2007-2011 VMware, Inc.\x0binformationS\x00\x00\x005Licensed under the MPL.  See http://www.rabbitmq.com/\x08platformS\x00\x00\x00\nErlang/OTP\x07productS\x00\x00\x00\x08RabbitMQ\x07versionS\x00\x00\x00\x052.6.1\x00\x00\x00\x0ePLAIN AMQPLAIN\x00\x00\x00\x05en_US\xce'
-    expectation = {'server_properties': {'information': 'Licensed under the MPL.  See http://www.rabbitmq.com/', 'product': 'RabbitMQ', 'copyright': 'Copyright (C) 2007-2011 VMware, Inc.', 'capabilities': {'exchange_exchange_bindings': True, 'consumer_cancel_notify': True, 'publisher_confirms': True, 'basic.nack': True}, 'platform': 'Erlang/OTP', 'version': '2.6.1'}, 'version_minor': 9, 'mechanisms': 'PLAIN AMQPLAIN', 'locales': 'en_US', 'version_major': 0}
+    frame_data = ('\x01\x00\x00\x00\x00\x01G\x00\n\x00\n\x00\t\x00\x00\x01"'
+                  '\x0ccapabilitiesF\x00\x00\x00X\x12publisher_confirmst\x01'
+                  '\x1aexchange_exchange_bindingst\x01\nbasic.nackt\x01\x16'
+                  'consumer_cancel_notifyt\x01\tcopyrightS\x00\x00\x00'
+                  '$Copyright (C) 2007-2011 VMware, Inc.\x0binformationS\x00'
+                  '\x00\x005Licensed under the MPL.  See http://www.rabbitmq.'
+                  'com/\x08platformS\x00\x00\x00\nErlang/OTP\x07productS\x00'
+                  '\x00\x00\x08RabbitMQ\x07versionS\x00\x00\x00\x052.6.1\x00'
+                  '\x00\x00\x0ePLAIN AMQPLAIN\x00\x00\x00\x05en_US\xce')
+    expectation = {'server_properties':
+                           {'information':
+                                ('Licensed under the MPL.  '
+                                 'See http://www.rabbitmq.com/'),
+                            'product': 'RabbitMQ',
+                            'copyright':
+                                'Copyright (C) 2007-2011 VMware, Inc.',
+                            'capabilities':
+                                    {'exchange_exchange_bindings': True,
+                                     'consumer_cancel_notify': True,
+                                     'publisher_confirms': True,
+                                     'basic.nack': True},
+                            'platform': 'Erlang/OTP',
+                            'version': '2.6.1'},
+                   'version_minor': 9,
+                   'mechanisms': 'PLAIN AMQPLAIN',
+                   'locales': 'en_US',
+                   'version_major': 0}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -648,8 +689,28 @@ def demarshal_connection_start_test():
 
 
 def demarshal_connection_startok_test():
-    frame_data = '\x01\x00\x00\x00\x00\x00\xf4\x00\n\x00\x0b\x00\x00\x00\xd0\x08platformS\x00\x00\x00\x0cPython 2.7.1\x07productS\x00\x00\x00\x1aPika Python Client Library\x07versionS\x00\x00\x00\n0.9.6-pre0\x0ccapabilitiesF\x00\x00\x00;\x16consumer_cancel_notifyt\x01\x12publisher_confirmst\x01\nbasic.nackt\x01\x0binformationS\x00\x00\x00\x1aSee http://pika.github.com\x05PLAIN\x00\x00\x00\x0c\x00guest\x00guest\x05en_US\xce'
-    expectation = {'locale': 'en_US', 'mechanism': 'PLAIN', 'client_properties': {'platform': 'Python 2.7.1', 'product': 'Pika Python Client Library', 'version': '0.9.6-pre0', 'capabilities': {'consumer_cancel_notify': True, 'publisher_confirms': True, 'basic.nack': True}, 'information': 'See http://pika.github.com'}, 'response': '\x00guest\x00guest'}
+    frame_data = ('\x01\x00\x00\x00\x00\x00\xf4\x00\n\x00\x0b\x00\x00\x00\xd0'
+                  '\x08platformS\x00\x00\x00\x0cPython 2.7.1\x07productS\x00'
+                  '\x00\x00\x1aPika Python Client Library\x07versionS\x00\x00'
+                  '\x00\n0.9.6-pre0\x0ccapabilitiesF\x00\x00\x00;\x16'
+                  'consumer_cancel_notifyt\x01\x12publisher_confirmst'
+                  '\x01\nbasic.nackt\x01\x0binformationS\x00\x00\x00\x1a'
+                  'See http://pika.github.com\x05PLAIN\x00\x00\x00\x0c\x00'
+                  'guest\x00guest\x05en_US\xce')
+    expectation = {'locale': 'en_US',
+                   'mechanism': 'PLAIN',
+                   'client_properties': {'platform': 'Python 2.7.1',
+                                         'product':
+                                             'Pika Python Client Library',
+                                         'version': '0.9.6-pre0',
+                                         'capabilities':
+                                                 {'consumer_cancel_notify':
+                                                      True,
+                                                  'publisher_confirms': True,
+                                                  'basic.nack': True},
+                                         'information':
+                                             'See http://pika.github.com'},
+                   'response': '\x00guest\x00guest'}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -675,7 +736,8 @@ def demarshal_connection_startok_test():
 
 
 def demarshal_connection_tune_test():
-    frame_data = '\x01\x00\x00\x00\x00\x00\x0c\x00\n\x00\x1e\x00\x00\x00\x02\x00\x00\x00\x00\xce'
+    frame_data = ('\x01\x00\x00\x00\x00\x00\x0c\x00\n\x00\x1e\x00\x00\x00\x02'
+                  '\x00\x00\x00\x00\xce')
     expectation = {'frame_max': 131072, 'channel_max': 0, 'heartbeat': 0}
 
     # Decode the frame and validate lengths
@@ -702,7 +764,8 @@ def demarshal_connection_tune_test():
 
 
 def demarshal_connection_tuneok_test():
-    frame_data = '\x01\x00\x00\x00\x00\x00\x0c\x00\n\x00\x1f\x00\x00\x00\x02\x00\x00\x00\x00\xce'
+    frame_data = ('\x01\x00\x00\x00\x00\x00\x0c\x00\n\x00\x1f\x00\x00\x00'
+                  '\x02\x00\x00\x00\x00\xce')
     expectation = {'frame_max': 131072, 'channel_max': 0, 'heartbeat': 0}
 
     # Decode the frame and validate lengths
@@ -753,8 +816,17 @@ def demarshal_content_body_frame_test():
 
 
 def demarshal_exchange_declare_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00%\x00(\x00\n\x00\x00\x12pika_test_exchange\x06direct\x00\x00\x00\x00\x00\xce'
-    expectation = {'nowait': False, 'exchange': 'pika_test_exchange', 'durable': False, 'passive': False, 'internal': False, 'arguments': {}, 'ticket': 0, 'type': 'direct', 'auto_delete': False}
+    frame_data = ('\x01\x00\x01\x00\x00\x00%\x00(\x00\n\x00\x00\x12'
+                  'pika_test_exchange\x06direct\x00\x00\x00\x00\x00\xce')
+    expectation = {'nowait': False,
+                   'exchange': 'pika_test_exchange',
+                   'durable': False,
+                   'passive': False,
+                   'internal': False,
+                   'arguments': {},
+                   'ticket': 0,
+                   'type': 'direct',
+                   'auto_delete': False}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -807,8 +879,12 @@ def demarshal_exchange_declareok_test():
 
 
 def demarshal_exchange_delete_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x1a\x00(\x00\x14\x00\x00\x12pika_test_exchange\x00\xce'
-    expectation = {'ticket': 0, 'if_unused': False, 'nowait': False, 'exchange': 'pika_test_exchange'}
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x1a\x00(\x00\x14\x00\x00\x12'
+                  'pika_test_exchange\x00\xce')
+    expectation = {'ticket': 0,
+                   'if_unused': False,
+                   'nowait': False,
+                   'exchange': 'pika_test_exchange'}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -861,8 +937,15 @@ def demarshal_exchange_deleteok_test():
 
 
 def demarshal_queue_bind_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00?\x002\x00\x14\x00\x00\x0fpika_test_queue\x12pika_test_exchange\x10test_routing_key\x00\x00\x00\x00\x00\xce'
-    expectation = {'nowait': False, 'exchange': 'pika_test_exchange', 'routing_key': 'test_routing_key', 'queue': 'pika_test_queue', 'arguments': {}, 'ticket': 0}
+    frame_data = ('\x01\x00\x01\x00\x00\x00?\x002\x00\x14\x00\x00\x0f'
+                  'pika_test_queue\x12pika_test_exchange\x10test_routing_key'
+                  '\x00\x00\x00\x00\x00\xce')
+    expectation = {'nowait': False,
+                   'exchange': 'pika_test_exchange',
+                   'routing_key': 'test_routing_key',
+                   'queue': 'pika_test_queue',
+                   'arguments': {},
+                   'ticket': 0}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -915,8 +998,16 @@ def demarshal_queue_bindok_test():
 
 
 def demarshal_queue_declare_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x10\x002\x00\n\x00\x00\x04test\x02\x00\x00\x00\x00\xce'
-    expectation = {'passive': False, 'nowait': False, 'exclusive': False, 'durable': True, 'queue': 'test', 'arguments': {}, 'ticket': 0, 'auto_delete': False}
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x10\x002\x00\n\x00\x00\x04test'
+                  '\x02\x00\x00\x00\x00\xce')
+    expectation = {'passive': False,
+                   'nowait': False,
+                   'exclusive': False,
+                   'durable': True,
+                   'queue': 'test',
+                   'arguments': {},
+                   'ticket': 0,
+                   'auto_delete': False}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -942,7 +1033,8 @@ def demarshal_queue_declare_test():
 
 
 def demarshal_queue_declareok_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x11\x002\x00\x0b\x04test\x00\x00\x12\x07\x00\x00\x00\x00\xce'
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x11\x002\x00\x0b\x04test'
+                  '\x00\x00\x12\x07\x00\x00\x00\x00\xce')
     expectation = {'queue': 'test', 'message_count': 4615, 'consumer_count': 0}
 
     # Decode the frame and validate lengths
@@ -967,9 +1059,15 @@ def demarshal_queue_declareok_test():
     # Run the frame check, assertions contained within
     test_support.check_frame(frame, expectation)
 
+
 def demarshal_queue_delete_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x17\x002\x00(\x00\x00\x0fpika_test_queue\x00\xce'
-    expectation = {'queue': 'pika_test_queue', 'ticket': 0, 'if_empty': False, 'nowait': False, 'if_unused': False}
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x17\x002\x00(\x00\x00\x0f'
+                  'pika_test_queue\x00\xce')
+    expectation = {'queue': 'pika_test_queue',
+                   'ticket': 0,
+                   'if_empty': False,
+                   'nowait': False,
+                   'if_unused': False}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
@@ -1022,7 +1120,8 @@ def demarshal_queue_deleteok_test():
 
 
 def demarshal_queue_purge_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00\x0c\x002\x00\x1e\x00\x00\x04test\x00\xce'
+    frame_data = ('\x01\x00\x01\x00\x00\x00\x0c\x002\x00\x1e\x00\x00\x04test'
+                  '\x00\xce')
     expectation = {'queue': 'test', 'ticket': 0, 'nowait': False}
 
     # Decode the frame and validate lengths
@@ -1049,8 +1148,14 @@ def demarshal_queue_purge_test():
 
 
 def demarshal_queue_unbind_test():
-    frame_data = '\x01\x00\x01\x00\x00\x00>\x002\x002\x00\x00\x0fpika_test_queue\x12pika_test_exchange\x10test_routing_key\x00\x00\x00\x00\xce'
-    expectation = {'queue': 'pika_test_queue', 'arguments': {}, 'ticket': 0, 'routing_key': 'test_routing_key', 'exchange': 'pika_test_exchange'}
+    frame_data = ('\x01\x00\x01\x00\x00\x00>\x002\x002\x00\x00\x0f'
+                  'pika_test_queue\x12pika_test_exchange\x10test_routing_key'
+                  '\x00\x00\x00\x00\xce')
+    expectation = {'queue': 'pika_test_queue',
+                   'arguments': {},
+                   'ticket': 0,
+                   'routing_key': 'test_routing_key',
+                   'exchange': 'pika_test_exchange'}
 
     # Decode the frame and validate lengths
     consumed, channel, frame = amqp.frame.demarshal(frame_data)
