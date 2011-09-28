@@ -10,4 +10,6 @@ import frame
 import header
 import specification
 
+from body import ContentBody
+from header import ContentHeader
 from header import ProtocolHeader

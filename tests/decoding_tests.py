@@ -224,8 +224,8 @@ def test_decode_field_array():
 \x00\x00\x00\x00Ec)\x92I\xbb\x9a\xca\x00D\x02\x00\x00\x01:f@H\xf5\xc3L\x00\x00\
 \x00\x00\xc4e5\xffL\x80\x00\x00\x00\x00\x00\x00\x08'
     data = [1, 45000, 'Test',  datetime(2006, 11, 21, 16, 30, 10).timetuple(),
-            3147483648, decimal.Decimal('3.14'), 3.14, long(3294967295),
-            9223372036854775816]
+            -1147483648, decimal.Decimal('3.14'), 3.14, long(3294967295),
+            -9223372036854775800]
     length, expectation = codec.decode.field_array(value)
     if not isinstance(expectation, list):
         assert False, \

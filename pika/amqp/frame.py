@@ -16,8 +16,10 @@ __since__ = '2011-09-24'
 import logging
 import struct
 
-from . import specification
+from . import body
 from . import header
+from . import specification
+
 from pika import codec
 
 
@@ -32,8 +34,7 @@ def demarshal(data_in):
     """Takes in binary data and maps builds the appropriate frame type,
     returning a frame object.
 
-    :param data_in: Raw byte stream data
-    :type data_in: str
+    :param str data_in: Raw byte stream data
     :returns: tuple of  bytes consumed, channel, and a frame object
     :raises: AMQPFrameError
 
@@ -52,23 +53,12 @@ def demarshal(data_in):
     # split the data into parts
     frame_data = data_in.split(chr(specification.AMQP_FRAME_END))[0]
 
-    #print repr(data_in)
-    #print repr(frame_data)
-    #raise ValueError()
-
     # How much data we should consume
     bytes_consumed = len(frame_data)
-
-    # The lengths should not match, the frame end byte should be gone
-    #if (bytes_consumed - 1) == len(data_in):
-    #    return _DEMARSHALLING_FAILURE
 
     # Decode the low level frame and break it into parts
     try:
         frame_type, channel, frame_size = _frame_parts(frame_data)
-
-        print frame_type, channel, frame_size
-
         last_byte = _FRAME_HEADER_SIZE + frame_size + 1
         frame_data = frame_data[_FRAME_HEADER_SIZE:last_byte]
     except ValueError:
@@ -91,6 +81,26 @@ def demarshal(data_in):
     raise specification.AMQPFrameError("Unknown frame type: %i" % frame_type)
 
 
+def marshal(frame, channel):
+    """Marshal a frame to be sent over the wire.
+
+    :param object frame: The frame object to marshal
+    :param int channel: The channel number to send the frame on
+    :returns: str
+    :raises: ValueError
+
+    """
+    if isinstance(frame, header.ProtocolHeader):
+        return frame.marshal()
+    elif isinstance(frame, specification.Frame):
+        return _marshal_method_frame(frame, channel)
+    elif isinstance(frame, header.ContentHeader):
+        return _marshal_content_header_frame(frame, channel)
+    elif isinstance(frame, body.ContentBody):
+        return _marshal_content_body_frames(frame, channel)
+    raise ValueError('Could not determine frame type: %r', frame)
+
+
 def _demarshal_protocol_header_frame(data_in):
     """Attempt to demarshal a protocol header frame
 
@@ -99,8 +109,7 @@ def _demarshal_protocol_header_frame(data_in):
     as cleanly since we don't have all of the attributes to return even
     regardless of success or failure.
 
-    :param data_in: Raw byte stream data
-    :type data_in: str
+    :param str data_in: Raw byte stream data
     :returns: header.ProtocolHeader
     :raises: ValueError
 
@@ -121,8 +130,7 @@ def _demarshal_protocol_header_frame(data_in):
 def _demarshal_method_frame(frame_data):
     """Attempt to demarshal a method frame
 
-    :param frame_data: Raw frame data to assign to our method frame
-    :type frame_data: str
+    :param str frame_data: Raw frame data to assign to our method frame
     :returns: tuple of the amount of data consumed and the frame object
 
     """
@@ -142,15 +150,13 @@ def _demarshal_method_frame(frame_data):
 def _demarshal_header_frame(frame_data):
     """Attempt to demarshal a header frame
 
-    :param frame_data: Raw frame data to assign to our header frame
-    :type frame_data: str
+    :param str frame_data: Raw frame data to assign to our header frame
     :returns: tuple of the amount of data consumed and the frame object
 
     """
     content_header = header.ContentHeader()
     content_header.demarshal(frame_data)
     return content_header
-
 
 
 def _demarshal_body_frame(frame_data):
@@ -169,8 +175,7 @@ def _demarshal_body_frame(frame_data):
 def _frame_parts(data_in):
     """Try and decode a low-level AMQP frame and return the parts of the frame.
 
-    :param data_in: Raw byte stream data
-    :type data_in: str
+    :param str data_in: Raw byte stream data
     :returns: tuple of frame type, channel number, and frame data to decode
     :raises: ValueError
     :raises: AMQPFrameError
@@ -182,3 +187,50 @@ def _frame_parts(data_in):
     except struct.error:
         # We didn't get a full frame
         return _DEMARSHALLING_FAILURE
+
+
+def _marshal_content_body_frame(frame, channel):
+    """Marshal as many content body frames as needed to transmit the content
+
+    :param body.ContentBody: Frame object to marshal
+    :param int channel: The channel number for the frame(s)
+    :returns: str
+
+    """
+    data = frame.marshal()
+    return struct.pack('>BHI',
+                       specification.AMQP_FRAME_BODY,
+                       channel,
+                       len(data)) + data + chr(specification.AMQP_FRAME_END)
+
+
+def _marshal_content_header_frame(frame, channel):
+    """Marshal a content header frame
+
+    :param header.ContentHeader: Frame object to marshal
+    :param int channel: The channel number for the frame
+    :returns: str
+
+    """
+    data = frame.marshal()
+    return struct.pack('>BHI',
+                       specification.AMQP_FRAME_HEADER,
+                       channel,
+                       len(data)) + data + chr(specification.AMQP_FRAME_END)
+
+
+def _marshal_method_frame(frame, channel):
+    """Marshal a method frame
+
+    :param specification.Frame: Frame object to marshal
+    :param int channel: The channel number for the frame
+    :returns: str
+
+    """
+    data = frame.marshal()
+    frame_type = struct.pack('>I', frame.index)
+    header = struct.pack('>BHI',
+                         specification.AMQP_FRAME_METHOD,
+                         channel,
+                         len(data) + 4)  # Extra 4 bytes are for frame type
+    return header + frame_type + data + chr(specification.AMQP_FRAME_END)

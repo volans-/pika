@@ -19,6 +19,18 @@ import struct
 import time
 
 
+def bit(value, byte, position):
+    """Encode a bit value
+
+    :param int value: Value to decode
+    :param int byte: The byte to apply the value to
+    :param int position: The position in the byte to set the bit on
+    :returns: tuple of bytes used and a bool value
+
+    """
+    return byte | (value << position)
+
+
 def boolean(value):
     """Encode a boolean value.
 
@@ -118,7 +130,7 @@ def octet(value):
     """
     if not isinstance(value, int):
         raise ValueError("int type required")
-    return struct.pack('>B', value)
+    return struct.pack('B', value)
 
 
 def short_int(value):
@@ -133,7 +145,7 @@ def short_int(value):
         raise ValueError("int type required")
     if value < -32768 or value > 32767:
         raise ValueError("Short range: -32768 to 32767")
-    return struct.pack('>h', value)
+    return struct.pack('>H', value)
 
 
 def short_string(value):
@@ -222,6 +234,7 @@ def table_integer(value):
     :returns: str.
 
     """
+    print value
     # Send the appropriately sized data value
     if -32768 < value < 32767:
         return 'U' + short_int(int(value))
@@ -280,9 +293,7 @@ def by_type(value, data_type):
 
     """
     # Determine the field type and encode it
-    if data_type == 'bit':
-        return boolean(value)
-    elif data_type == 'field_array':
+    if data_type == 'field_array':
         return field_array(value)
     elif data_type == 'long':
         return long_int(value)

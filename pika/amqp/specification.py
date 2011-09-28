@@ -125,13 +125,59 @@ class Frame(object):
         :returns: unicode
 
         """
-        output = list()
+        output = []
+        processing_bitset = False
+        byte = None
+        offset = 0
         for argument in self.attributes:
-            output.append(codec.encode.by_type(getattr(self,
-                                                       argument),
-                                               getattr(self.__class__,
-                                                       argument)))
-        return u''.join(output)
+            data_type = getattr(self.__class__, argument)
+
+            print 'Processings %s' % argument
+            print 'Data type: %s' % data_type
+
+            # Check if we need to turn on bit processing
+            if not processing_bitset and data_type == 'bit':
+                byte = 0
+                offset = 0
+                processing_bitset = True
+
+            # Get the data value
+            data_value = getattr(self, argument)
+
+            # If we're processing a bitset, apply special rules
+            if processing_bitset:
+
+                # Is this value not a bit? turn off bitset processing and
+                # append the byte value as an octet
+                if data_type != 'bit':
+                    processing_bitset = False
+                    output.append(codec.encode.octet(byte))
+
+                else:
+                    # Apply the bit value to the byte
+                    byte = codec.encode.bit(data_value, byte, offset)
+                    offset += 1
+                    if offset == 8:
+                        # We've filled a byte for all bits, add the byte
+                        output.append(codec.encode.octet(byte))
+                        # Turn off processing, we'll turn on in next iteration
+                        # if needed
+                        processing_bitset = False
+
+                    # Go to the next iteration
+                    continue
+
+
+            # Not a bit, so just process by type
+            output.append(codec.encode.by_type(data_value, data_type))
+
+        # Append the last byte if we're processing a bitset
+        if processing_bitset:
+            output.append(codec.encode.octet(byte))
+
+
+        print repr(output)
+        return ''.join(output)
 
 
 

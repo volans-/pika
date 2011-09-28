@@ -76,7 +76,7 @@ def long_int(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 4, struct.unpack('>L', value[0:4])[0]
+    return 4, struct.unpack('>l', value[0:4])[0]
 
 
 def long_long_int(value):
@@ -87,7 +87,7 @@ def long_long_int(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 8, struct.unpack('>Q', value[0:8])[0]
+    return 8, struct.unpack('>q', value[0:8])[0]
 
 
 def long_string(value):
