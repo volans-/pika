@@ -189,13 +189,13 @@ def get_argument_type_doc(argument):
         elif argument['type'] == "longlong":
             return 'int/long'
         elif argument['type'] == "longstr":
-            return 'unicode'
+            return 'str'
         elif argument['type'] == "octet":
             return 'int'
         elif argument['type'] == "short":
             return 'int'
         elif argument['type'] == "shortstr":
-            return 'unicode'
+            return 'str'
         elif argument['type'] == "table":
             return 'dict'
         elif argument['type'] == "timestamp":
@@ -230,10 +230,7 @@ def new_function(function_name, arguments, indent=0):
                isinstance(argument['default-value'], int):
                 value = argument['default-value']
             else:
-
-
-
-                value = '"%s"' % argument['default-value']
+                value = '%r' % argument['default-value']
         else:
             value = 'None'
         args.append('%s=%s' % (name, value))
@@ -510,18 +507,18 @@ for class_name in class_list:
                                        pep8_class_name(method['name'])), indent)
         new_line()
 
-        comment("AMQP Method Arguments", indent)
+        comment("AMQP Method Attributes", indent)
         arguments = list()
         for argument in method['arguments']:
             arguments.append('"%s",' % argument_name(argument['name']))
 
         if arguments:
             arguments[-1] = arguments[-1].replace(',', ']')
-            new_line('arguments = [' + arguments.pop(0), indent)
+            new_line('attributes = [' + arguments.pop(0), indent)
             for line in arguments:
-                new_line(line, indent + 13)
+                new_line(line, indent + 14)
         else:
-            new_line('arguments = []', indent)
+            new_line('attributes = []', indent)
         new_line()
 
         if method['arguments']:

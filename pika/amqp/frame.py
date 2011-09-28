@@ -33,7 +33,7 @@ def demarshal(data_in):
     returning a frame object.
 
     :param data_in: Raw byte stream data
-    :type data_in: unicode
+    :type data_in: str
     :returns: tuple of  bytes consumed, channel, and a frame object
     :raises: AMQPFrameError
 
@@ -50,11 +50,14 @@ def demarshal(data_in):
         return _DEMARSHALLING_FAILURE
 
     # split the data into parts
-    frame_data = data_in.split(unichr(specification.AMQP_FRAME_END))[0].encode('utf-8')
+    frame_data = data_in.split(chr(specification.AMQP_FRAME_END))[0]
+
+    #print repr(data_in)
+    #print repr(frame_data)
+    #raise ValueError()
 
     # How much data we should consume
     bytes_consumed = len(frame_data)
-    print repr(frame_data)
 
     # The lengths should not match, the frame end byte should be gone
     #if (bytes_consumed - 1) == len(data_in):
@@ -63,6 +66,9 @@ def demarshal(data_in):
     # Decode the low level frame and break it into parts
     try:
         frame_type, channel, frame_size = _frame_parts(frame_data)
+
+        print frame_type, channel, frame_size
+
         last_byte = _FRAME_HEADER_SIZE + frame_size + 1
         frame_data = frame_data[_FRAME_HEADER_SIZE:last_byte]
     except ValueError:
@@ -94,7 +100,7 @@ def _demarshal_protocol_header_frame(data_in):
     regardless of success or failure.
 
     :param data_in: Raw byte stream data
-    :type data_in: unicode
+    :type data_in: str
     :returns: header.ProtocolHeader
     :raises: ValueError
 
@@ -116,12 +122,12 @@ def _demarshal_method_frame(frame_data):
     """Attempt to demarshal a method frame
 
     :param frame_data: Raw frame data to assign to our method frame
-    :type frame_data: unicode
+    :type frame_data: str
     :returns: tuple of the amount of data consumed and the frame object
 
     """
     # Get the Method Index from the class data
-    bytes_used, method_index = codec.decode.long_int(frame_data)
+    bytes_used, method_index = codec.decode.long_int(frame_data[0:4])
 
     # Create an instance of the method object we're going to demarshal
     method = specification.INDEX_MAPPING[method_index]()
@@ -137,7 +143,7 @@ def _demarshal_header_frame(frame_data):
     """Attempt to demarshal a header frame
 
     :param frame_data: Raw frame data to assign to our header frame
-    :type frame_data: unicode
+    :type frame_data: str
     :returns: tuple of the amount of data consumed and the frame object
 
     """
@@ -151,7 +157,7 @@ def _demarshal_body_frame(frame_data):
     """Attempt to demarshal a body frame
 
     :param frame_data: Raw frame data to assign to our body frame
-    :type frame_data: unicode
+    :type frame_data: str
     :returns: tuple of the amount of data consumed and the frame object
 
     """
@@ -164,7 +170,7 @@ def _frame_parts(data_in):
     """Try and decode a low-level AMQP frame and return the parts of the frame.
 
     :param data_in: Raw byte stream data
-    :type data_in: unicode
+    :type data_in: str
     :returns: tuple of frame type, channel number, and frame data to decode
     :raises: ValueError
     :raises: AMQPFrameError
@@ -172,8 +178,7 @@ def _frame_parts(data_in):
     """
     # Get the Frame Type, Channel Number and Frame Size
     try:
-        return struct.unpack('>BHL', data_in[0:_FRAME_HEADER_SIZE])
+        return struct.unpack('>BHI', data_in[0:_FRAME_HEADER_SIZE])
     except struct.error:
         # We didn't get a full frame
         return _DEMARSHALLING_FAILURE
-

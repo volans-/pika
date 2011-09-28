@@ -42,7 +42,7 @@ class ProtocolHeader(object):
         object by iterating through the attributes in order and decoding them.
 
         :param data: The binary encoded method data
-        :type data: unicode
+        :type data: str
         :returns: int byte count of data used to demarshal the frame
         :raises: ValueError
 
@@ -67,12 +67,12 @@ class ProtocolHeader(object):
         """Return the full AMQP wire protocol frame data representation of the
         ProtocolHeader frame.
 
-        :returns: unicode
+        :returns: str
         """
-        return u'AMQP' + struct.pack('BBBB', 0,
-                                     self.major_version,
-                                     self.minor_version,
-                                     self.revision)
+        return 'AMQP' + struct.pack('BBBB', 0,
+                                    self.major_version,
+                                    self.minor_version,
+                                    self.revision)
 
 
 class ContentHeader(object):
@@ -108,7 +108,7 @@ class ContentHeader(object):
         object by iterating through the attributes in order and decoding them.
 
         :param data: The binary encoded method data
-        :type data: unicode
+        :type data: str
         :returns: int byte count of data used to demarshal the frame
         :raises: ValueError
 
@@ -120,8 +120,6 @@ class ContentHeader(object):
 
         data = data[13:]
 
-        print repr(data)
-
         # Get the flags for what properties we have available
         offset, flags = self._get_flags(data)
 
@@ -132,7 +130,7 @@ class ContentHeader(object):
         """Decode the flags from the data returning the bytes consumed and flags
 
         :param data: The data to pull flags out of
-        :type data: unicode
+        :type data: str
         :returns: int, int
 
         """

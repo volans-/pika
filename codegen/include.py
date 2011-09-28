@@ -4,7 +4,7 @@ class Frame(object):
     behavior.
 
     """
-    arguments = list()
+    attributes = list()
     id = 0
     index = 0
     name = 'Frame'
@@ -18,11 +18,30 @@ class Frame(object):
         :type data: str
 
         """
-        for argument in self.arguments:
+        offset = 0
+        processing_bitset = False
+        for argument in self.attributes:
+
             data_type = getattr(self.__class__, argument)
-            consumed, value = codec.decode.by_type(data, data_type)
+
+            if offset == 7 and processing_bitset:
+                data = data[1:]
+                offset = 0
+
+            if processing_bitset and data_type != 'bit':
+                offset = 0
+                processing_bitset = False
+                data = data[1:]
+
+            consumed, value = codec.decode.by_type(data, data_type, offset)
+
+            if data_type == 'bit':
+                offset += 1
+                processing_bitset = True
+
             setattr(self, argument, value)
-            data = data[consumed:]
+            if consumed:
+                data = data[consumed:]
 
     def marshal(self):
         """
@@ -34,12 +53,13 @@ class Frame(object):
 
         """
         output = list()
-        for argument in self.arguments:
+        for argument in self.attributes:
             output.append(codec.encode.by_type(getattr(self,
                                                        argument),
                                                getattr(self.__class__,
                                                        argument)))
         return u''.join(output)
+
 
 
 class PropertiesBase(object):

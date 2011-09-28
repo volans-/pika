@@ -17,8 +17,19 @@ import decimal as _decimal
 import struct
 import time
 
-
 # Base data type decoders
+
+
+def bit(value, position):
+    """Decode a bit value
+
+    :param value: Value to decode
+    :type value: basestring
+    :returns: tuple of bytes used and a bool value
+
+    """
+    bit_buffer = struct.unpack('B', value[0])[0]
+    return 0, (bit_buffer & (1 << position)) != 0
 
 
 def boolean(value):
@@ -30,7 +41,7 @@ def boolean(value):
 
     """
 
-    return 1, bool(struct.unpack_from('>B', value)[0])
+    return 1, bool(struct.unpack_from('B', value[0])[0])
 
 
 def decimal(value):
@@ -41,8 +52,8 @@ def decimal(value):
     :returns: tuple of bytes used and a decimal.Decimal value
 
     """
-    decimals = struct.unpack_from('>B', value)[0]
-    raw = struct.unpack_from('>i', value, 1)[0]
+    decimals = struct.unpack('B', value[0])[0]
+    raw = struct.unpack('>I', value[1:5])[0]
     return 5, _decimal.Decimal(raw) * (_decimal.Decimal(10) ** -decimals)
 
 
@@ -65,7 +76,7 @@ def long_int(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 4, struct.unpack_from('>l', value)[0]
+    return 4, struct.unpack('>L', value[0:4])[0]
 
 
 def long_long_int(value):
@@ -76,7 +87,7 @@ def long_long_int(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 8, struct.unpack_from('>q', value)[0]
+    return 8, struct.unpack('>Q', value[0:8])[0]
 
 
 def long_string(value):
@@ -87,7 +98,7 @@ def long_string(value):
     :returns: tuple of bytes used and a unicode value
 
     """
-    length = struct.unpack_from('>I', value)[0]
+    length = struct.unpack('>I', value[0:4])[0]
     return length + 4, unicode(value[4:length + 4])
 
 
@@ -99,8 +110,7 @@ def octet(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 1, struct.unpack_from('>B', value)[0]
-
+    return 1, struct.unpack('B', value[0])[0]
 
 def short_int(value):
     """Decode a short integer value
@@ -110,7 +120,7 @@ def short_int(value):
     :returns: tuple of bytes used and an int value
 
     """
-    return 2, struct.unpack_from('>H', value)[0]
+    return 2, struct.unpack_from('>H', value[0:2])[0]
 
 
 def short_string(value):
@@ -121,7 +131,7 @@ def short_string(value):
     :returns: tuple of bytes used and a unicode value
 
     """
-    length = struct.unpack_from('>B', value)[0]
+    length = struct.unpack('B', value[0])[0]
     return length + 1, unicode(value[1:length + 1])
 
 
@@ -133,7 +143,7 @@ def timestamp(value):
     :returns: tuple of bytes used and a struct_time value
 
     """
-    return 8, time.gmtime(struct.unpack_from('>Q', value)[0])
+    return 8, time.gmtime(struct.unpack('>Q', value[0:8])[0])
 
 
 # Compound data types
@@ -147,7 +157,7 @@ def field_array(value):
     :returns: tuple of bytes used and a list
 
     """
-    length = struct.unpack_from('>I', value)[0]
+    length = struct.unpack('>I', value[0:4])[0]
     offset = 4
     data = list()
     field_array_end = offset + length
@@ -166,12 +176,12 @@ def field_table(value):
     :returns: tuple of bytes used and a dict
 
     """
-    length = struct.unpack_from('>I', value)[0]
+    length = struct.unpack('>I', value[0:4])[0]
     offset = 4
     data = dict()
     field_table_end = offset + length
     while offset < field_table_end:
-        key_length = struct.unpack_from('>B', value, offset)[0]
+        key_length = struct.unpack_from('B', value, offset)[0]
         offset += 1
         key = value[offset:offset + key_length]
         offset += key_length
@@ -222,7 +232,7 @@ def _embedded_value(value):
     raise ValueError("Unknown type: %s" % value[0])
 
 
-def by_type(value, data_type):
+def by_type(value, data_type, offset=0):
     """Decodes values using the specified type
 
     :param value: Value to decode
@@ -234,6 +244,8 @@ def by_type(value, data_type):
     """
     # Determine the field type and encode it
     if data_type == 'bit':
+        return bit(value, offset)
+    if data_type == 'boolean':
         return boolean(value)
     elif data_type == 'long':
         return long_int(value)
@@ -256,7 +268,8 @@ def by_type(value, data_type):
 
 
 # Define a data type mapping to methods
-METHODS = {"bit": boolean,
+METHODS = {"bit": bit,
+           'boolen': boolean,
            "long": long_int,
            "longlong": long_long_int ,
            "longstr": long_string,
