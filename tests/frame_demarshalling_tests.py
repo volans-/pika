@@ -6,7 +6,7 @@
 
 __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
-__date__ = '2011-04-10'
+__date__ = '2011-09-27'
 
 import test_support
 from pika import amqp
@@ -1205,10 +1205,3 @@ def demarshal_queue_unbindok_test():
 
     # Run the frame check, assertions contained within
     test_support.check_frame(frame, expectation)
-
-
-def marshal_protocol_header_test():
-    frame_data = 'AMQP\x00\x00\t\x01'
-    test = amqp.ProtocolHeader()
-    if test.marshal() != frame_data:
-        assert False, "ProtocolHeader frame did not match frame data sample"
