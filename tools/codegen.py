@@ -11,7 +11,7 @@ CODEGEN_DIR = '../codegen/'
 CODEGEN_IGNORE_CLASSES = ['access']
 CODEGEN_JSON = CODEGEN_DIR + 'amqp-rabbitmq-0.9.1.json'
 CODEGEN_XML = CODEGEN_DIR + 'amqp0-9-1.xml'
-CODEGEN_OUTPUT = '../pika/amqp/definitions.py'
+CODEGEN_OUTPUT = '../pika/amqp/specification.py'
 CODEGEN_JSON_URL = ('http://hg.rabbitmq.com'
                     '/rabbitmq-codegen/archive/default.tar.bz2')
 CODEGEN_XML_URL = 'http://www.rabbitmq.com/resources/specs/amqp0-9-1.xml'

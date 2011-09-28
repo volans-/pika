@@ -37,7 +37,7 @@ def test_protocol_header_demarshal():
 
     if (test.major_version,
         test.minor_version,
-        test.revision) != amqp.definitions.AMQP_VERSION:
+        test.revision) != amqp.specification.AMQP_VERSION:
         assert False, "Invalid Protocol Version: %i-%i-%i" % \
                       (test.major_version, test.minor_version, test.revision)
 
@@ -337,3 +337,27 @@ def test_content_header_demarshal():
 
     # Run the frame check, assertions contained within
     test_support.check_frame(frame.properties, properties)
+
+
+def test_content_body_demarshal():
+    frame_data = (u'\x03\x00\x01\x00\x00\x00#Hello World #0:'
+                  u'1316899165.75516605\xce')
+
+    expectation = "Hello World #0:1316899165.75516605"
+
+    # Decode the frame and validate lengths
+    consumed, channel, data = amqp.frame.demarshal(frame_data)
+
+    # Validate the bytes consumed
+    if consumed != 41:
+        assert False, \
+            'Bytes consumed did not match the expected value: %i/%i' % \
+            (41, consumed)
+
+    # Validate the channel
+    if channel != 1:
+        assert False, 'Channel number did not match the expected value'
+
+    # Validate the content
+    if data != expectation:
+        assert False, 'Content frame data did not match the expected value'

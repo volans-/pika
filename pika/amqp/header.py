@@ -15,7 +15,7 @@ __since__ = '2011-09-24'
 
 import struct
 
-from . import definitions
+from . import specification
 from pika import codec
 
 
@@ -33,9 +33,9 @@ class ProtocolHeader(object):
         :param revision: Revision number.
         :type revision: int.
         """
-        self.major_version = major_version or definitions.AMQP_VERSION[0]
-        self.minor_version = minor_version or definitions.AMQP_VERSION[1]
-        self.revision = revision or definitions.AMQP_VERSION[2]
+        self.major_version = major_version or specification.AMQP_VERSION[0]
+        self.minor_version = minor_version or specification.AMQP_VERSION[1]
+        self.revision = revision or specification.AMQP_VERSION[2]
 
     def demarshal(self, data):
         """Dynamically decode the frame data applying the values to the method
@@ -101,7 +101,7 @@ class ContentHeader(object):
         self.class_id = class_id
         self.weight = weight
         self.body_size = body_size
-        self.properties = definitions.Basic.Properties()
+        self.properties = specification.Basic.Properties()
 
     def demarshal(self, data):
         """Dynamically decode the frame data applying the values to the method

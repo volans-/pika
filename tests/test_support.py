@@ -81,7 +81,7 @@ def compare_dicts(source, dest, method='Unknown'):
         if isinstance(source[key], Decimal) or \
            isinstance(source[key], int) or \
            isinstance(source[key], long) or \
-           isinstance(source[key], str):
+           isinstance(source[key], basestring):
             if source[key] != dest[key]:
                 assert False, \
                 "%s did not properly decode item %s '%r' vs '%r'" \

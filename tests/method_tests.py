@@ -9,7 +9,7 @@ __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-09-23'
 
 import test_support
-from pika.amqp import definitions as amqp
+from pika.amqp import specification as amqp
 
 
 def decode_connection_open_test():

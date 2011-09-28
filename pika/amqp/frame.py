@@ -16,7 +16,7 @@ __since__ = '2011-09-24'
 import logging
 import struct
 
-from . import definitions
+from . import specification
 from . import header
 from pika import codec
 
@@ -50,7 +50,7 @@ def demarshal(data_in):
         return _DEMARSHALLING_FAILURE
 
     # split the data into parts
-    frame_data = data_in.split(unichr(definitions.AMQP_FRAME_END))[0].encode('utf-8')
+    frame_data = data_in.split(unichr(specification.AMQP_FRAME_END))[0].encode('utf-8')
 
     # How much data we should consume
     bytes_consumed = len(frame_data)
@@ -70,19 +70,19 @@ def demarshal(data_in):
                         data_in)
         return _DEMARSHALLING_FAILURE
 
-    if frame_type == definitions.AMQP_FRAME_METHOD:
+    if frame_type == specification.AMQP_FRAME_METHOD:
         return bytes_consumed, channel, _demarshal_method_frame(frame_data)
 
-    elif frame_type == definitions.AMQP_FRAME_HEADER:
+    elif frame_type == specification.AMQP_FRAME_HEADER:
         return bytes_consumed, channel, _demarshal_header_frame(frame_data)
 
-    #elif frame_type == amqp.AMQP_FRAME_BODY:
-    #    consumed, frame_obj = decode_body_frame(channel, data, frame_end)
+    elif frame_type == specification.AMQP_FRAME_BODY:
+        return bytes_consumed, channel, frame_data
 
     #elif frame_type == amqp.AMQP_FRAME_HEARTBEAT:
     #    consumed, frame_obj = decode_heartbeat_frame(channel, data, frame_end)
 
-    raise definitions.AMQPFrameError("Unknown frame type: %i" % frame_type)
+    raise specification.AMQPFrameError("Unknown frame type: %i" % frame_type)
 
 
 def _demarshal_protocol_header_frame(data_in):
@@ -124,7 +124,7 @@ def _demarshal_method_frame(frame_data):
     bytes_used, method_index = codec.decode.long_int(frame_data)
 
     # Create an instance of the method object we're going to demarshal
-    method = definitions.INDEX_MAPPING[method_index]()
+    method = specification.INDEX_MAPPING[method_index]()
 
     # Demarshal the data
     method.demarshal(frame_data[bytes_used:])
@@ -137,6 +137,20 @@ def _demarshal_header_frame(frame_data):
     """Attempt to demarshal a header frame
 
     :param frame_data: Raw frame data to assign to our header frame
+    :type frame_data: unicode
+    :returns: tuple of the amount of data consumed and the frame object
+
+    """
+    content_header = header.ContentHeader()
+    content_header.demarshal(frame_data)
+    return content_header
+
+
+
+def _demarshal_body_frame(frame_data):
+    """Attempt to demarshal a body frame
+
+    :param frame_data: Raw frame data to assign to our body frame
     :type frame_data: unicode
     :returns: tuple of the amount of data consumed and the frame object
 
