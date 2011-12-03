@@ -348,6 +348,9 @@ for constant in amqp['constants']:
         new_line('AMQP_%s = %i' % \
                 (dashify(constant['name']), constant['value']))
 new_line()
+comment('Not included in the spec XML or JSON files.')
+new_line('AMQP_FRAME_MAX_SIZE = 131072')
+new_line()
 
 # Data types
 data_types = []

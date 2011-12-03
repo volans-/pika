@@ -8,7 +8,7 @@ For copyright and licensing please refer to COPYING.
 
 """
 
-__date__ = "2011-09-28"
+__date__ = "2011-10-16"
 __author__ = "codegen.py"
 
 from pika import codec
@@ -33,6 +33,9 @@ AMQP_FRAME_END = 206
 # for future use - the current protocol design does not use positive
 # confirmation and reply codes are sent only in case of an error.
 AMQP_REPLY_SUCCESS = 200
+
+# Not included in the spec XML or JSON files.
+AMQP_FRAME_MAX_SIZE = 131072
 
 # AMQP data types
 AMQP_DATA_TYPES = ["bit",
@@ -188,10 +191,8 @@ class PropertiesBase(object):
         Dynamically decode the frame data applying the values to the method
         object by iterating through the attributes in order and decoding them.
 
-        :param flags: Flags that indicate if the data has the given property
-        :type flags: int
-        :param data: The binary encoded method data
-        :type data: unicode
+        :param int flags: Flags that indicate if the data has the given property
+        :param str data: The binary encoded method data
 
         """
         flag_values = getattr(self.__class__, 'flags')
