@@ -32,7 +32,6 @@ def demarshal_basic_cancel_test():
             (expectation, data)
 
 
-
 def demarshal_basic_cancelok_test():
     expectation = '\x01\x00\x01\x00\x00\x00\x0c\x00<\x00\x1f\x07ctag1.0\xce'
     frame = amqp.specification.Basic.CancelOk(consumer_tag='ctag1.0')
@@ -41,3 +40,4 @@ def demarshal_basic_cancelok_test():
         assert False, \
             "marshalling did not return the expectation:\n%r\n%r" % \
             (expectation, data)
+
