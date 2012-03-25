@@ -51,7 +51,7 @@ def demarshal(data_in):
         return _DEMARSHALLING_FAILURE
 
     # split the data into parts
-    frame_data = data_in.split(chr(specification.AMQP_FRAME_END))[0]
+    frame_data = data_in.split(chr(specification.FRAME_END))[0]
 
     # How much data we should consume
     bytes_consumed = len(frame_data)
@@ -66,19 +66,19 @@ def demarshal(data_in):
                         data_in)
         return _DEMARSHALLING_FAILURE
 
-    if frame_type == specification.AMQP_FRAME_METHOD:
+    if frame_type == specification.FRAME_METHOD:
         return bytes_consumed, channel, _demarshal_method_frame(frame_data)
 
-    elif frame_type == specification.AMQP_FRAME_HEADER:
+    elif frame_type == specification.FRAME_HEADER:
         return bytes_consumed, channel, _demarshal_header_frame(frame_data)
 
-    elif frame_type == specification.AMQP_FRAME_BODY:
+    elif frame_type == specification.FRAME_BODY:
         return bytes_consumed, channel, frame_data
 
-    #elif frame_type == amqp.AMQP_FRAME_HEARTBEAT:
+    #elif frame_type == amqp.FRAME_HEARTBEAT:
     #    consumed, frame_obj = decode_heartbeat_frame(channel, data, frame_end)
 
-    raise specification.AMQPFrameError("Unknown frame type: %i" % frame_type)
+    raise specification.FrameError("Unknown frame type: %i" % frame_type)
 
 
 def marshal(frame, channel):
@@ -97,7 +97,7 @@ def marshal(frame, channel):
     elif isinstance(frame, header.ContentHeader):
         return _marshal_content_header_frame(frame, channel)
     elif isinstance(frame, body.ContentBody):
-        return _marshal_content_body_frames(frame, channel)
+        return _marshal_content_body_frame(frame, channel)
     raise ValueError('Could not determine frame type: %r', frame)
 
 
@@ -199,9 +199,9 @@ def _marshal_content_body_frame(frame, channel):
     """
     data = frame.marshal()
     return struct.pack('>BHI',
-                       specification.AMQP_FRAME_BODY,
+                       specification.FRAME_BODY,
                        channel,
-                       len(data)) + data + chr(specification.AMQP_FRAME_END)
+                       len(data)) + data + chr(specification.FRAME_END)
 
 
 def _marshal_content_header_frame(frame, channel):
@@ -214,9 +214,9 @@ def _marshal_content_header_frame(frame, channel):
     """
     data = frame.marshal()
     return struct.pack('>BHI',
-                       specification.AMQP_FRAME_HEADER,
+                       specification.FRAME_HEADER,
                        channel,
-                       len(data)) + data + chr(specification.AMQP_FRAME_END)
+                       len(data)) + data + chr(specification.FRAME_END)
 
 
 def _marshal_method_frame(frame, channel):
@@ -230,7 +230,7 @@ def _marshal_method_frame(frame, channel):
     data = frame.marshal()
     frame_type = struct.pack('>I', frame.index)
     header = struct.pack('>BHI',
-                         specification.AMQP_FRAME_METHOD,
+                         specification.FRAME_METHOD,
                          channel,
                          len(data) + 4)  # Extra 4 bytes are for frame type
-    return header + frame_type + data + chr(specification.AMQP_FRAME_END)
+    return header + frame_type + data + chr(specification.FRAME_END)

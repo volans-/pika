@@ -8,37 +8,38 @@ For copyright and licensing please refer to COPYING.
 
 """
 
-__date__ = "2011-10-16"
+__date__ = "2012-03-25"
 __author__ = "codegen.py"
 
 from pika import codec
 
 # AMQP Protocol Version
-AMQP_VERSION = (0, 9, 1)
+VERSION = (0, 9, 1)
 
 # RabbitMQ Defaults
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 5672
 DEFAULT_USER = "guest"
 DEFAULT_PASS = "guest"
+DEFAULT_VHOST = "/"
 
 # AMQP Constants
-AMQP_FRAME_METHOD = 1
-AMQP_FRAME_HEADER = 2
-AMQP_FRAME_BODY = 3
-AMQP_FRAME_HEARTBEAT = 8
-AMQP_FRAME_MIN_SIZE = 4096
-AMQP_FRAME_END = 206
+FRAME_METHOD = 1
+FRAME_HEADER = 2
+FRAME_BODY = 3
+FRAME_HEARTBEAT = 8
+FRAME_MIN_SIZE = 4096
+FRAME_END = 206
 # Indicates that the method completed successfully. This reply code is reserved
 # for future use - the current protocol design does not use positive
 # confirmation and reply codes are sent only in case of an error.
-AMQP_REPLY_SUCCESS = 200
+REPLY_SUCCESS = 200
 
 # Not included in the spec XML or JSON files.
-AMQP_FRAME_MAX_SIZE = 131072
+FRAME_MAX_SIZE = 131072
 
 # AMQP data types
-AMQP_DATA_TYPES = ["bit",
+DATA_TYPES = [     "bit",
                    "long",
                    "longlong",
                    "longstr",
@@ -49,7 +50,7 @@ AMQP_DATA_TYPES = ["bit",
                    "timestamp"]
 
 # AMQP domains
-AMQP_DOMAINS = {"channel-id": "longstr",
+DOMAINS = {     "channel-id": "longstr",
                 "class-id": "short",
                 "consumer-tag": "shortstr",
                 "delivery-tag": "longlong",
@@ -206,7 +207,7 @@ class PropertiesBase(object):
 
 
 # AMQP Errors
-class AMQPContentTooLarge(Warning):
+class ContentTooLarge(Warning):
     """
     The client attempted to transfer content larger than the server could
     accept at the present time. The client may retry at a later time.
@@ -216,7 +217,7 @@ class AMQPContentTooLarge(Warning):
     value = 311
 
 
-class AMQPNoRoute(Warning):
+class NoRoute(Warning):
     """
     Undocumented AMQP Soft Error
 
@@ -225,7 +226,7 @@ class AMQPNoRoute(Warning):
     value = 312
 
 
-class AMQPNoConsumers(Warning):
+class NoConsumers(Warning):
     """
     When the exchange cannot deliver to a consumer when the immediate flag is
     set. As a result of pending data on the queue or the absence of any
@@ -236,7 +237,7 @@ class AMQPNoConsumers(Warning):
     value = 313
 
 
-class AMQPAccessRefused(Warning):
+class AccessRefused(Warning):
     """
     The client attempted to work with a server entity to which it has no access
     due to security settings.
@@ -246,7 +247,7 @@ class AMQPAccessRefused(Warning):
     value = 403
 
 
-class AMQPNotFound(Warning):
+class NotFound(Warning):
     """
     The client attempted to work with a server entity that does not exist.
 
@@ -255,7 +256,7 @@ class AMQPNotFound(Warning):
     value = 404
 
 
-class AMQPResourceLocked(Warning):
+class ResourceLocked(Warning):
     """
     The client attempted to work with a server entity to which it has no access
     because another client is working with it.
@@ -265,7 +266,7 @@ class AMQPResourceLocked(Warning):
     value = 405
 
 
-class AMQPPreconditionFailed(Warning):
+class PreconditionFailed(Warning):
     """
     The client requested a method that was not allowed because some
     precondition failed.
@@ -275,7 +276,7 @@ class AMQPPreconditionFailed(Warning):
     value = 406
 
 
-class AMQPConnectionForced(Exception):
+class ConnectionForced(Exception):
     """
     An operator intervened to close the connection for some reason. The client
     may retry at some later date.
@@ -285,7 +286,7 @@ class AMQPConnectionForced(Exception):
     value = 320
 
 
-class AMQPInvalidPath(Exception):
+class InvalidPath(Exception):
     """
     The client tried to work with an unknown virtual host.
 
@@ -294,7 +295,7 @@ class AMQPInvalidPath(Exception):
     value = 402
 
 
-class AMQPFrameError(Exception):
+class FrameError(Exception):
     """
     The sender sent a malformed frame that the recipient could not decode. This
     strongly implies a programming error in the sending peer.
@@ -304,7 +305,7 @@ class AMQPFrameError(Exception):
     value = 501
 
 
-class AMQPSyntaxError(Exception):
+class SyntaxError(Exception):
     """
     The sender sent a frame that contained illegal values for one or more
     fields. This strongly implies a programming error in the sending peer.
@@ -314,7 +315,7 @@ class AMQPSyntaxError(Exception):
     value = 502
 
 
-class AMQPCommandInvalid(Exception):
+class CommandInvalid(Exception):
     """
     The client sent an invalid sequence of frames, attempting to perform an
     operation that was considered invalid by the server. This usually implies a
@@ -325,7 +326,7 @@ class AMQPCommandInvalid(Exception):
     value = 503
 
 
-class AMQPChannelError(Exception):
+class ChannelError(Exception):
     """
     The client attempted to work with a channel that had not been correctly
     opened. This most likely indicates a fault in the client layer.
@@ -335,7 +336,7 @@ class AMQPChannelError(Exception):
     value = 504
 
 
-class AMQPUnexpectedFrame(Exception):
+class UnexpectedFrame(Exception):
     """
     The peer sent a frame that was not expected, usually in the context of a
     content header and body.  This strongly indicates a fault in the peer's
@@ -346,7 +347,7 @@ class AMQPUnexpectedFrame(Exception):
     value = 505
 
 
-class AMQPResourceError(Exception):
+class ResourceError(Exception):
     """
     The server could not complete the method because it lacked sufficient
     resources. This may be due to the client creating too many of some type of
@@ -357,7 +358,7 @@ class AMQPResourceError(Exception):
     value = 506
 
 
-class AMQPNotAllowed(Exception):
+class NotAllowed(Exception):
     """
     The client tried to work with some entity in a manner that is prohibited by
     the server, due to security settings or by some other criteria.
@@ -367,7 +368,7 @@ class AMQPNotAllowed(Exception):
     value = 530
 
 
-class AMQPNotImplemented(Exception):
+class NotImplemented(Exception):
     """
     The client tried to use functionality that is not implemented in the
     server.
@@ -377,7 +378,7 @@ class AMQPNotImplemented(Exception):
     value = 540
 
 
-class AMQPInternalError(Exception):
+class InternalError(Exception):
     """
     The server could not complete the method because of an internal error. The
     server may require intervention by an operator in order to resume normal
@@ -389,24 +390,24 @@ class AMQPInternalError(Exception):
 
 
 # AMQP Error code to class mapping
-AMQP_ERRORS = {320: AMQPConnectionForced,
-               505: AMQPUnexpectedFrame,
-               502: AMQPSyntaxError,
-               503: AMQPCommandInvalid,
-               530: AMQPNotAllowed,
-               504: AMQPChannelError,
-               402: AMQPInvalidPath,
-               403: AMQPAccessRefused,
-               404: AMQPNotFound,
-               405: AMQPResourceLocked,
-               406: AMQPPreconditionFailed,
-               311: AMQPContentTooLarge,
-               312: AMQPNoRoute,
-               313: AMQPNoConsumers,
-               506: AMQPResourceError,
-               540: AMQPNotImplemented,
-               541: AMQPInternalError,
-               501: AMQPFrameError}
+ERRORS = {320: ConnectionForced,
+               505: UnexpectedFrame,
+               502: SyntaxError,
+               503: CommandInvalid,
+               530: NotAllowed,
+               504: ChannelError,
+               402: InvalidPath,
+               403: AccessRefused,
+               404: NotFound,
+               405: ResourceLocked,
+               406: PreconditionFailed,
+               311: ContentTooLarge,
+               312: NoRoute,
+               313: NoConsumers,
+               506: ResourceError,
+               540: NotImplemented,
+               541: InternalError,
+               501: FrameError}
 
 # AMQP Classes and Methods
 
@@ -455,16 +456,11 @@ class Connection(object):
                      locales=u'en_US'):
             """Initialize the Connection.Start class
 
-            :param version_major: Protocol major version
-            :type version_major: int
-            :param version_minor: Protocol minor version
-            :type version_minor: int
-            :param server_properties: Server properties
-            :type server_properties: dict
-            :param mechanisms: Available security mechanisms
-            :type mechanisms: str
-            :param locales: Available message locales
-            :type locales: str
+            :param int version_major: Protocol major version
+            :param int version_minor: Protocol minor version
+            :param dict server_properties: Server properties
+            :param str mechanisms: Available security mechanisms
+            :param str locales: Available message locales
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -515,14 +511,10 @@ class Connection(object):
                      response=None, locale=u'en_US'):
             """Initialize the Connection.StartOk class
 
-            :param client_properties: Client properties
-            :type client_properties: dict
-            :param mechanism: Selected security mechanism
-            :type mechanism: str
-            :param response: Security response data
-            :type response: str
-            :param locale: Selected message locale
-            :type locale: str
+            :param dict client_properties: Client properties
+            :param str mechanism: Selected security mechanism
+            :param str response: Security response data
+            :param str locale: Selected message locale
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -562,8 +554,7 @@ class Connection(object):
         def __init__(self, challenge=None):
             """Initialize the Connection.Secure class
 
-            :param challenge: Security challenge data
-            :type challenge: str
+            :param str challenge: Security challenge data
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -596,8 +587,7 @@ class Connection(object):
         def __init__(self, response=None):
             """Initialize the Connection.SecureOk class
 
-            :param response: Security response data
-            :type response: str
+            :param str response: Security response data
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -631,12 +621,9 @@ class Connection(object):
         def __init__(self, channel_max=0, frame_max=0, heartbeat=0):
             """Initialize the Connection.Tune class
 
-            :param channel_max: Proposed maximum channels
-            :type channel_max: int
-            :param frame_max: Proposed maximum frame size
-            :type frame_max: int/long
-            :param heartbeat: Desired heartbeat delay
-            :type heartbeat: int
+            :param int channel_max: Proposed maximum channels
+            :param int/long frame_max: Proposed maximum frame size
+            :param int heartbeat: Desired heartbeat delay
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -680,12 +667,9 @@ class Connection(object):
         def __init__(self, channel_max=0, frame_max=0, heartbeat=0):
             """Initialize the Connection.TuneOk class
 
-            :param channel_max: Negotiated maximum channels
-            :type channel_max: int
-            :param frame_max: Negotiated maximum frame size
-            :type frame_max: int/long
-            :param heartbeat: Desired heartbeat delay
-            :type heartbeat: int
+            :param int channel_max: Negotiated maximum channels
+            :param int/long frame_max: Negotiated maximum frame size
+            :param int heartbeat: Desired heartbeat delay
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -728,12 +712,9 @@ class Connection(object):
         def __init__(self, virtual_host=u'/', capabilities=None, insist=False):
             """Initialize the Connection.Open class
 
-            :param virtual_host: Virtual host name
-            :type virtual_host: str
-            :param capabilities: Deprecated
-            :type capabilities: str
-            :param insist: Deprecated
-            :type insist: bool
+            :param str virtual_host: Virtual host name
+            :param str capabilities: Deprecated
+            :param bool insist: Deprecated
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -771,8 +752,7 @@ class Connection(object):
         def __init__(self, known_hosts=None):
             """Initialize the Connection.OpenOk class
 
-            :param known_hosts: Deprecated
-            :type known_hosts: str
+            :param str known_hosts: Deprecated
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -812,14 +792,10 @@ class Connection(object):
                      method_id=None):
             """Initialize the Connection.Close class
 
-            :param reply_code: Reply code from server
-            :type reply_code: int
-            :param reply_text: Localised reply text
-            :type reply_text: str
-            :param class_id: Failing method class
-            :type class_id: int
-            :param method_id: Failing method ID
-            :type method_id: int
+            :param int reply_code: Reply code from server
+            :param str reply_text: Localised reply text
+            :param int class_id: Failing method class
+            :param int method_id: Failing method ID
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -895,8 +871,7 @@ class Channel(object):
         def __init__(self, out_of_band=None):
             """Initialize the Channel.Open class
 
-            :param out_of_band: Protocol level field, do not use, must be zero.
-            :type out_of_band: str
+            :param str out_of_band: Protocol level field, do not use, must be zero.
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -928,8 +903,7 @@ class Channel(object):
         def __init__(self, channel_id=None):
             """Initialize the Channel.OpenOk class
 
-            :param channel_id: Deprecated
-            :type channel_id: str
+            :param str channel_id: Deprecated
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -963,8 +937,7 @@ class Channel(object):
         def __init__(self, active=None):
             """Initialize the Channel.Flow class
 
-            :param active: Start/stop content frames
-            :type active: bool
+            :param bool active: Start/stop content frames
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -996,8 +969,7 @@ class Channel(object):
         def __init__(self, active=None):
             """Initialize the Channel.FlowOk class
 
-            :param active: Current flow setting
-            :type active: bool
+            :param bool active: Current flow setting
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1037,14 +1009,10 @@ class Channel(object):
                      method_id=None):
             """Initialize the Channel.Close class
 
-            :param reply_code: Reply code from server
-            :type reply_code: int
-            :param reply_text: Localised reply text
-            :type reply_text: str
-            :param class_id: Failing method class
-            :type class_id: int
-            :param method_id: Failing method ID
-            :type method_id: int
+            :param int reply_code: Reply code from server
+            :param str reply_text: Localised reply text
+            :param int class_id: Failing method class
+            :param int method_id: Failing method ID
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1139,24 +1107,15 @@ class Exchange(object):
                      internal=False, nowait=False, arguments={}):
             """Initialize the Exchange.Declare class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param exchange:
-            :type exchange: str
-            :param type: Exchange type
-            :type type: str
-            :param passive: Do not create exchange
-            :type passive: bool
-            :param durable: Request a durable exchange
-            :type durable: bool
-            :param auto_delete: Auto-delete when unused
-            :type auto_delete: bool
-            :param internal: Create internal exchange
-            :type internal: bool
-            :param nowait: Do not send a reply method
-            :type nowait: bool
-            :param arguments: Arguments for declaration
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str exchange:
+            :param str type: Exchange type
+            :param bool passive: Do not create exchange
+            :param bool durable: Request a durable exchange
+            :param bool auto_delete: Auto-delete when unused
+            :param bool internal: Create internal exchange
+            :param bool nowait: Do not send a reply method
+            :param dict arguments: Arguments for declaration
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1241,14 +1200,10 @@ class Exchange(object):
                      nowait=False):
             """Initialize the Exchange.Delete class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param exchange:
-            :type exchange: str
-            :param if_unused: Delete only if unused
-            :type if_unused: bool
-            :param nowait: Do not send a reply method
-            :type nowait: bool
+            :param int ticket: Deprecated
+            :param str exchange:
+            :param bool if_unused: Delete only if unused
+            :param bool nowait: Do not send a reply method
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1320,18 +1275,12 @@ class Exchange(object):
                      routing_key=None, nowait=False, arguments={}):
             """Initialize the Exchange.Bind class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param destination: Name of the destination exchange to bind to
-            :type destination: str
-            :param source: Name of the source exchange to bind to
-            :type source: str
-            :param routing_key: Message routing key
-            :type routing_key: str
-            :param nowait: Do not send a reply method
-            :type nowait: bool
-            :param arguments: Arguments for binding
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str destination: Name of the destination exchange to bind to
+            :param str source: Name of the source exchange to bind to
+            :param str routing_key: Message routing key
+            :param bool nowait: Do not send a reply method
+            :param dict arguments: Arguments for binding
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1410,18 +1359,12 @@ class Exchange(object):
                      routing_key=None, nowait=False, arguments={}):
             """Initialize the Exchange.Unbind class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param destination:
-            :type destination: str
-            :param source:
-            :type source: str
-            :param routing_key: Routing key of binding
-            :type routing_key: str
-            :param nowait: Do not send a reply method
-            :type nowait: bool
-            :param arguments: Arguments of binding
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str destination:
+            :param str source:
+            :param str routing_key: Routing key of binding
+            :param bool nowait: Do not send a reply method
+            :param dict arguments: Arguments of binding
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1518,22 +1461,14 @@ class Queue(object):
                      arguments={}):
             """Initialize the Queue.Declare class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param passive: Do not create queue
-            :type passive: bool
-            :param durable: Request a durable queue
-            :type durable: bool
-            :param exclusive: Request an exclusive queue
-            :type exclusive: bool
-            :param auto_delete: Auto-delete queue when unused
-            :type auto_delete: bool
-            :param nowait: Do not send a reply method
-            :type nowait: bool
-            :param arguments: Arguments for declaration
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str queue:
+            :param bool passive: Do not create queue
+            :param bool durable: Request a durable queue
+            :param bool exclusive: Request an exclusive queue
+            :param bool auto_delete: Auto-delete queue when unused
+            :param bool nowait: Do not send a reply method
+            :param dict arguments: Arguments for declaration
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1591,12 +1526,9 @@ class Queue(object):
                      consumer_count=None):
             """Initialize the Queue.DeclareOk class
 
-            :param queue:
-            :type queue: str
-            :param message_count: Number of messages in queue
-            :type message_count: int/long
-            :param consumer_count: Number of consumers
-            :type consumer_count: int/long
+            :param str queue:
+            :param int/long message_count: Number of messages in queue
+            :param int/long consumer_count: Number of consumers
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1644,18 +1576,12 @@ class Queue(object):
                      routing_key=None, nowait=False, arguments={}):
             """Initialize the Queue.Bind class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param exchange: Name of the exchange to bind to
-            :type exchange: str
-            :param routing_key: Message routing key
-            :type routing_key: str
-            :param nowait: Do not send a reply method
-            :type nowait: bool
-            :param arguments: Arguments for binding
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str queue:
+            :param str exchange: Name of the exchange to bind to
+            :param str routing_key: Message routing key
+            :param bool nowait: Do not send a reply method
+            :param dict arguments: Arguments for binding
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1727,12 +1653,9 @@ class Queue(object):
         def __init__(self, ticket=0, queue=None, nowait=False):
             """Initialize the Queue.Purge class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param nowait: Do not send a reply method
-            :type nowait: bool
+            :param int ticket: Deprecated
+            :param str queue:
+            :param bool nowait: Do not send a reply method
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1769,8 +1692,7 @@ class Queue(object):
         def __init__(self, message_count=None):
             """Initialize the Queue.PurgeOk class
 
-            :param message_count:
-            :type message_count: int/long
+            :param int/long message_count:
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1809,16 +1731,11 @@ class Queue(object):
                      if_empty=False, nowait=False):
             """Initialize the Queue.Delete class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param if_unused: Delete only if unused
-            :type if_unused: bool
-            :param if_empty: Delete only if empty
-            :type if_empty: bool
-            :param nowait: Do not send a reply method
-            :type nowait: bool
+            :param int ticket: Deprecated
+            :param str queue:
+            :param bool if_unused: Delete only if unused
+            :param bool if_empty: Delete only if empty
+            :param bool nowait: Do not send a reply method
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1861,8 +1778,7 @@ class Queue(object):
         def __init__(self, message_count=None):
             """Initialize the Queue.DeleteOk class
 
-            :param message_count:
-            :type message_count: int/long
+            :param int/long message_count:
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1899,16 +1815,11 @@ class Queue(object):
                      routing_key=None, arguments={}):
             """Initialize the Queue.Unbind class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param exchange:
-            :type exchange: str
-            :param routing_key: Routing key of binding
-            :type routing_key: str
-            :param arguments: Arguments of binding
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str queue:
+            :param str exchange:
+            :param str routing_key: Routing key of binding
+            :param dict arguments: Arguments of binding
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -1992,12 +1903,9 @@ class Basic(object):
         def __init__(self, prefetch_size=0, prefetch_count=0, global_=False):
             """Initialize the Basic.Qos class
 
-            :param prefetch_size: Prefetch window in octets
-            :type prefetch_size: int/long
-            :param prefetch_count: Prefetch window in messages
-            :type prefetch_count: int
-            :param global_: Apply to entire connection
-            :type global_: bool
+            :param int/long prefetch_size: Prefetch window in octets
+            :param int prefetch_count: Prefetch window in messages
+            :param bool global_: Apply to entire connection
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2076,22 +1984,14 @@ class Basic(object):
                      nowait=False, arguments={}):
             """Initialize the Basic.Consume class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param consumer_tag:
-            :type consumer_tag: str
-            :param no_local: Do not deliver own messages
-            :type no_local: bool
-            :param no_ack: No acknowledgement needed
-            :type no_ack: bool
-            :param exclusive: Request exclusive access
-            :type exclusive: bool
-            :param nowait: Do not send a reply method
-            :type nowait: bool
-            :param arguments: Arguments for declaration
-            :type arguments: dict
+            :param int ticket: Deprecated
+            :param str queue:
+            :param str consumer_tag:
+            :param bool no_local: Do not deliver own messages
+            :param bool no_ack: No acknowledgement needed
+            :param bool exclusive: Request exclusive access
+            :param bool nowait: Do not send a reply method
+            :param dict arguments: Arguments for declaration
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2143,8 +2043,7 @@ class Basic(object):
         def __init__(self, consumer_tag=None):
             """Initialize the Basic.ConsumeOk class
 
-            :param consumer_tag:
-            :type consumer_tag: str
+            :param str consumer_tag:
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2186,10 +2085,8 @@ class Basic(object):
         def __init__(self, consumer_tag=None, nowait=False):
             """Initialize the Basic.Cancel class
 
-            :param consumer_tag: Consumer tag
-            :type consumer_tag: str
-            :param nowait: Do not send a reply method
-            :type nowait: bool
+            :param str consumer_tag: Consumer tag
+            :param bool nowait: Do not send a reply method
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2224,8 +2121,7 @@ class Basic(object):
         def __init__(self, consumer_tag=None):
             """Initialize the Basic.CancelOk class
 
-            :param consumer_tag: Consumer tag
-            :type consumer_tag: str
+            :param str consumer_tag: Consumer tag
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2266,16 +2162,11 @@ class Basic(object):
                      mandatory=False, immediate=False):
             """Initialize the Basic.Publish class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param exchange:
-            :type exchange: str
-            :param routing_key: Message routing key
-            :type routing_key: str
-            :param mandatory: Indicate mandatory routing
-            :type mandatory: bool
-            :param immediate: Request immediate delivery
-            :type immediate: bool
+            :param int ticket: Deprecated
+            :param str exchange:
+            :param str routing_key: Message routing key
+            :param bool mandatory: Indicate mandatory routing
+            :param bool immediate: Request immediate delivery
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2325,14 +2216,10 @@ class Basic(object):
                      routing_key=None):
             """Initialize the Basic.Return class
 
-            :param reply_code: Reply code from server
-            :type reply_code: int
-            :param reply_text: Localised reply text
-            :type reply_text: str
-            :param exchange:
-            :type exchange: str
-            :param routing_key: Message routing key
-            :type routing_key: str
+            :param int reply_code: Reply code from server
+            :param str reply_text: Localised reply text
+            :param str exchange:
+            :param str routing_key: Message routing key
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2381,16 +2268,11 @@ class Basic(object):
                      redelivered=False, exchange=None, routing_key=None):
             """Initialize the Basic.Deliver class
 
-            :param consumer_tag: Consumer tag
-            :type consumer_tag: str
-            :param delivery_tag: Server-assigned delivery tag
-            :type delivery_tag: int/long
-            :param redelivered: Message is being redelivered
-            :type redelivered: bool
-            :param exchange:
-            :type exchange: str
-            :param routing_key: Message routing key
-            :type routing_key: str
+            :param str consumer_tag: Consumer tag
+            :param int/long delivery_tag: Server-assigned delivery tag
+            :param bool redelivered: Message is being redelivered
+            :param str exchange:
+            :param str routing_key: Message routing key
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2436,12 +2318,9 @@ class Basic(object):
         def __init__(self, ticket=0, queue=None, no_ack=False):
             """Initialize the Basic.Get class
 
-            :param ticket: Deprecated
-            :type ticket: int
-            :param queue:
-            :type queue: str
-            :param no_ack: No acknowledgement needed
-            :type no_ack: bool
+            :param int ticket: Deprecated
+            :param str queue:
+            :param bool no_ack: No acknowledgement needed
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2489,16 +2368,11 @@ class Basic(object):
                      routing_key=None, message_count=None):
             """Initialize the Basic.GetOk class
 
-            :param delivery_tag: Server-assigned delivery tag
-            :type delivery_tag: int/long
-            :param redelivered: Message is being redelivered
-            :type redelivered: bool
-            :param exchange:
-            :type exchange: str
-            :param routing_key: Message routing key
-            :type routing_key: str
-            :param message_count: Number of messages in queue
-            :type message_count: int/long
+            :param int/long delivery_tag: Server-assigned delivery tag
+            :param bool redelivered: Message is being redelivered
+            :param str exchange:
+            :param str routing_key: Message routing key
+            :param int/long message_count: Number of messages in queue
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2539,8 +2413,7 @@ class Basic(object):
         def __init__(self, cluster_id=None):
             """Initialize the Basic.GetEmpty class
 
-            :param cluster_id: Deprecated
-            :type cluster_id: str
+            :param str cluster_id: Deprecated
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2576,10 +2449,8 @@ class Basic(object):
         def __init__(self, delivery_tag=0, multiple=False):
             """Initialize the Basic.Ack class
 
-            :param delivery_tag: Server-assigned delivery tag
-            :type delivery_tag: int/long
-            :param multiple: Acknowledge multiple messages
-            :type multiple: bool
+            :param int/long delivery_tag: Server-assigned delivery tag
+            :param bool multiple: Acknowledge multiple messages
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2615,10 +2486,8 @@ class Basic(object):
         def __init__(self, delivery_tag=None, requeue=True):
             """Initialize the Basic.Reject class
 
-            :param delivery_tag: Server-assigned delivery tag
-            :type delivery_tag: int/long
-            :param requeue: Requeue the message
-            :type requeue: bool
+            :param int/long delivery_tag: Server-assigned delivery tag
+            :param bool requeue: Requeue the message
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2652,8 +2521,7 @@ class Basic(object):
         def __init__(self, requeue=False):
             """Initialize the Basic.RecoverAsync class
 
-            :param requeue: Requeue the message
-            :type requeue: bool
+            :param bool requeue: Requeue the message
 
             :raises: DeprecationWarning
 
@@ -2689,8 +2557,7 @@ class Basic(object):
         def __init__(self, requeue=False):
             """Initialize the Basic.Recover class
 
-            :param requeue: Requeue the message
-            :type requeue: bool
+            :param bool requeue: Requeue the message
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -2749,12 +2616,9 @@ class Basic(object):
         def __init__(self, delivery_tag=0, multiple=False, requeue=True):
             """Initialize the Basic.Nack class
 
-            :param delivery_tag: Server-assigned delivery tag
-            :type delivery_tag: int/long
-            :param multiple: Reject multiple messages
-            :type multiple: bool
-            :param requeue: Requeue the message
-            :type requeue: bool
+            :param int/long delivery_tag: Server-assigned delivery tag
+            :param bool multiple: Reject multiple messages
+            :param bool requeue: Requeue the message
 
             """
             # Specifies if this is a synchronous AMQP method
@@ -3111,8 +2975,7 @@ class Confirm(object):
         def __init__(self, nowait=False):
             """Initialize the Confirm.Select class
 
-            :param nowait: Do not send a reply method
-            :type nowait: bool
+            :param bool nowait: Do not send a reply method
 
             """
             # Specifies if this is a synchronous AMQP method

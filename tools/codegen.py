@@ -324,9 +324,9 @@ new_line()
 
 # AMQP Version Header
 comment("AMQP Protocol Version")
-new_line('AMQP_VERSION = (%i, %i, %i)' % (amqp['major-version'],
-                                         amqp['minor-version'],
-                                         amqp['revision']))
+new_line('VERSION = (%i, %i, %i)' % (amqp['major-version'],
+                                     amqp['minor-version'],
+                                     amqp['revision']))
 new_line()
 
 # Defaults
@@ -335,6 +335,7 @@ new_line('DEFAULT_HOST = "localhost"')
 new_line('DEFAULT_PORT = %i' % amqp['port'])
 new_line('DEFAULT_USER = "guest"')
 new_line('DEFAULT_PASS = "guest"')
+new_line('DEFAULT_VHOST = "/"')
 new_line()
 
 # Constant
@@ -345,11 +346,11 @@ for constant in amqp['constants']:
         doc = get_documentation({'constant': constant['name'].lower()})
         if doc:
             comment(doc)
-        new_line('AMQP_%s = %i' % \
+        new_line('%s = %i' % \
                 (dashify(constant['name']), constant['value']))
 new_line()
 comment('Not included in the spec XML or JSON files.')
-new_line('AMQP_FRAME_MAX_SIZE = 131072')
+new_line('FRAME_MAX_SIZE = 131072')
 new_line()
 
 # Data types
@@ -367,15 +368,15 @@ for domain, data_type in amqp['domains']:
         domains.append('                "%s": "%s",' % (domain, data_type))
 
 comment("AMQP data types")
-data_types[0] = data_types[0].replace('                   ',
-                                      'AMQP_DATA_TYPES = [')
+data_types[0] = data_types[0].replace('              ',
+                                      'DATA_TYPES = [')
 data_types[-1] = data_types[-1].replace(',', ']')
 output += data_types
 new_line()
 
 comment("AMQP domains")
-domains[0] = domains[0].replace('                ',
-                                'AMQP_DOMAINS = {')
+domains[0] = domains[0].replace('           ',
+                                'DOMAINS = {')
 
 domains[-1] = domains[-1].replace(',', '}')
 output += domains
@@ -404,7 +405,7 @@ comment("AMQP Errors")
 errors = {}
 for constant in amqp['constants']:
     if 'class' in constant:
-        class_name = 'AMQP' + classify(constant['name'])
+        class_name = classify(constant['name'])
         if constant['class'] == 'soft-error':
             extends = 'Warning'
         elif constant['class'] == 'hard-error':
@@ -437,7 +438,7 @@ for error_code in errors.keys():
                                                    errors[error_code]))
 comment("AMQP Error code to class mapping")
 error_lines[0] = error_lines[0].replace('               ',
-                                        'AMQP_ERRORS = {')
+                                        'ERRORS = {')
 error_lines[-1] = error_lines[-1].replace(',', '}')
 output += error_lines
 
@@ -558,12 +559,9 @@ for class_name in class_list:
                                    'method': method['name'],
                                    'field': argument['name']})
                 if label:
-                    new_line(':param %s: %s' % (name, label), indent)
+                    new_line(':param %s %s: %s' % (get_argument_type_doc(argument), name, label), indent)
                 else:
-                    new_line(':param %s:' % name, indent)
-                new_line(':type %s: %s' % (name,
-                                           get_argument_type_doc(argument)),
-                         indent)
+                    new_line(':param %s %s:' % (get_argument_type_doc(argument), name), indent)
 
         # Note the deprecation warning in the docblock
         if method_xml and 'deprecated' in method_xml[0].attrib and \
