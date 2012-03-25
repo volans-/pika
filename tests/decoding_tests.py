@@ -1,12 +1,11 @@
-# ***** BEGIN LICENSE BLOCK *****
-#
-# For copyright and licensing please refer to COPYING.
-#
-# ***** END LICENSE BLOCK *****
+# coding=utf-8
 
 __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-03-29'
+
+import sys
+sys.path.insert(0, '..')
 
 import test_support
 import pika.codec as codec
@@ -340,12 +339,23 @@ def test_decode_timestamp():
 
 
 def test_decode_by_value_error():
-
     try:
         codec.decode.by_type('VALUE', 'GOOD')
     except ValueError:
         return
     assert False, 'decode.by_type did not raise ValueError for bad type'
 
-# -- Encoding Tests --
 
+
+def test_decode_embedded_value_none():
+    value = codec.decode._embedded_value(None)
+    if value != (0, None):
+        assert False, 'decode._embedded_value did not return 0, None'
+
+
+def test_decode_by_value_boolean():
+    length, response = codec.decode.by_type('\x01', 'boolean')
+    if not length == 1:
+        assert False, 'decode.by_value did not decode 1 byte'
+    if not isinstance(response, bool) or not response:
+        assert False, 'decode._by_value did not return bool true'

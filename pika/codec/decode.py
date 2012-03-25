@@ -23,9 +23,8 @@ import time
 def bit(value, position):
     """Decode a bit value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a bool value
+    :param str value: Value to decode
+    :return tuple: bytes used, bool value
 
     """
     bit_buffer = struct.unpack('B', value[0])[0]
@@ -35,21 +34,18 @@ def bit(value, position):
 def boolean(value):
     """Decode a boolean value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a bool value
+    :param str value: Value to decode
+    :return tuple: bytes used, bool
 
     """
-
     return 1, bool(struct.unpack_from('B', value[0])[0])
 
 
 def decimal(value):
     """Decode a decimal value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a decimal.Decimal value
+    :param str value: Value to decode
+    :return tuple: bytes used and , decimal.Decimal value
 
     """
     decimals = struct.unpack('B', value[0])[0]
@@ -60,9 +56,8 @@ def decimal(value):
 def floating_point(value):
     """Decode a floating point value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a float value
+    :param str value: Value to decode
+    :return tuple: bytes used, float
 
     """
     return 4, struct.unpack_from('>f', value)[0]
@@ -71,9 +66,8 @@ def floating_point(value):
 def long_int(value):
     """Decode a long integer value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and an int value
+    :param str value: Value to decode
+    :return tuple: bytes used, int
 
     """
     return 4, struct.unpack('>l', value[0:4])[0]
@@ -82,9 +76,8 @@ def long_int(value):
 def long_long_int(value):
     """Decode a long-long integer value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and an int value
+    :param str value: Value to decode
+    :return tuple: bytes used, int
 
     """
     return 8, struct.unpack('>q', value[0:8])[0]
@@ -93,9 +86,8 @@ def long_long_int(value):
 def long_string(value):
     """Decode a string value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a unicode value
+    :param str value: Value to decode
+    :return tuple: bytes used, unicode
 
     """
     length = struct.unpack('>I', value[0:4])[0]
@@ -105,9 +97,8 @@ def long_string(value):
 def octet(value):
     """Decode an octet value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and an int value
+    :param str value: Value to decode
+    :return tuple: bytes used, int
 
     """
     return 1, struct.unpack('B', value[0])[0]
@@ -115,9 +106,8 @@ def octet(value):
 def short_int(value):
     """Decode a short integer value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and an int value
+    :param str value: Value to decode
+    :return tuple: bytes used, int
 
     """
     return 2, struct.unpack_from('>H', value[0:2])[0]
@@ -126,9 +116,8 @@ def short_int(value):
 def short_string(value):
     """Decode a string value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a unicode value
+    :param str value: Value to decode
+    :return tuple: bytes used, unicode
 
     """
     length = struct.unpack('B', value[0])[0]
@@ -138,9 +127,8 @@ def short_string(value):
 def timestamp(value):
     """Decode a timestamp value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a struct_time value
+    :param str value: Value to decode
+    :return tuple: bytes used, struct_time
 
     """
     return 8, time.gmtime(struct.unpack('>Q', value[0:8])[0])
@@ -152,9 +140,8 @@ def timestamp(value):
 def field_array(value):
     """Decode a field array value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a list
+    :param str value: Value to decode
+    :return tuple: bytes used, list
 
     """
     length = struct.unpack('>I', value[0:4])[0]
@@ -171,9 +158,8 @@ def field_array(value):
 def field_table(value):
     """Decode a field array value
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes used and a dict
+    :param str value: Value to decode
+    :return tuple: bytes used, dict
 
     """
     length = struct.unpack('>I', value[0:4])[0]
@@ -195,9 +181,8 @@ def _embedded_value(value):
     """Takes in a value looking at the first byte to determine which decoder to
     use
 
-    :param value: Value to decode
-    :type value: basestring
-    :returns: tuple of bytes consumed and mixed
+    :param str value: Value to decode
+    :return tuple: bytes consumed, mixed
 
     """
     if not value:
@@ -235,11 +220,9 @@ def _embedded_value(value):
 def by_type(value, data_type, offset=0):
     """Decodes values using the specified type
 
-    :param value: Value to decode
-    :type value: basestring
-    :param data_type: type of data to decode
-    :type data_type: basestring
-    :returns: tuple of bytes used, mixed based on field type
+    :param str value: Value to decode
+    :param str data_type: type of data to decode
+    :return tuple: bytes consumed, mixed based on field type
 
     """
     # Determine the field type and encode it
