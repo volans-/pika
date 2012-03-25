@@ -1,18 +1,9 @@
-# ***** BEGIN LICENSE BLOCK *****
-#
-# For copyright and licensing please refer to COPYING.
-#
-# ***** END LICENSE BLOCK *****
-
 __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-03-29'
 
 from decimal import Decimal
-import sys
 from time import mktime, struct_time
-
-sys.path.insert(0, '..')
 
 
 def validate_attribute(method, attribute, attribute_type, value='ignore'):
