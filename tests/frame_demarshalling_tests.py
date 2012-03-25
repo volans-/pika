@@ -1,12 +1,11 @@
-# ***** BEGIN LICENSE BLOCK *****
-#
-# For copyright and licensing please refer to COPYING.
-#
-# ***** END LICENSE BLOCK *****
+# coding=utf-8
 
 __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-09-27'
+
+import sys
+sys.path.insert(0, '..')
 
 import test_support
 from pika import amqp
