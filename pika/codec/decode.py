@@ -45,7 +45,7 @@ def decimal(value):
     """Decode a decimal value
 
     :param str value: Value to decode
-    :return tuple: bytes used and , decimal.Decimal value
+    :return tuple: bytes used, decimal.Decimal value
 
     """
     decimals = struct.unpack('B', value[0])[0]
@@ -102,6 +102,7 @@ def octet(value):
 
     """
     return 1, struct.unpack('B', value[0])[0]
+
 
 def short_int(value):
     """Decode a short integer value
@@ -214,7 +215,7 @@ def _embedded_value(value):
     elif value[0] == '\x00':
         return 0, None
 
-    raise ValueError("Unknown type: %s" % value[0])
+    raise ValueError('Unknown type: %s' % value[0])
 
 
 def by_type(value, data_type, offset=0):
@@ -247,17 +248,17 @@ def by_type(value, data_type, offset=0):
     elif data_type == 'timestamp':
         return timestamp(value)
 
-    raise ValueError("Unknown type: %s" % value)
+    raise ValueError('Unknown type: %s' % value)
 
 
 # Define a data type mapping to methods
-METHODS = {"bit": bit,
+METHODS = {'bit': bit,
            'boolen': boolean,
-           "long": long_int,
-           "longlong": long_long_int ,
-           "longstr": long_string,
-           "octet": octet,
-           "short": short_int,
-           "shortstr": short_string,
-           "table": field_table,
-           "timestamp": timestamp}
+           'long': long_int,
+           'longlong': long_long_int,
+           'longstr': long_string,
+           'octet': octet,
+           'short': short_int,
+           'shortstr': short_string,
+           'table': field_table,
+           'timestamp': timestamp}

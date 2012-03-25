@@ -25,7 +25,7 @@ def bit(value, byte, position):
     :param int value: Value to decode
     :param int byte: The byte to apply the value to
     :param int position: The position in the byte to set the bit on
-    :returns: tuple of bytes used and a bool value
+    :rtype: tuple of bytes used and a bool value
 
     """
     return byte | (value << position)
@@ -34,9 +34,8 @@ def bit(value, byte, position):
 def boolean(value):
     """Encode a boolean value.
 
-    :param value: Value to encode.
-    :type value: boolean.
-    :returns: str.
+    :param bool value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, bool):
@@ -47,9 +46,8 @@ def boolean(value):
 def decimal(value):
     """Encode a decimal.Decimal value.
 
-    :param value: Value to encode.
-    :type value: decimal.Decimal.
-    :returns: str.
+    :param decimal.Decimal value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, _decimal.Decimal):
@@ -66,9 +64,8 @@ def decimal(value):
 def floating_point(value):
     """Encode a floating point value.
 
-    :param value: Value to encode.
-    :type value: float.
-    :returns: str.
+    :param float value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, float):
@@ -79,9 +76,8 @@ def floating_point(value):
 def long_int(value):
     """Encode a long integer.
 
-    :param value: Value to encode.
-    :type value: long, int.
-    :returns: str.
+    :param long or int value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, long) and not isinstance(value, int):
@@ -94,9 +90,8 @@ def long_int(value):
 def long_long_int(value):
     """Encode a long-long int.
 
-    :param value: Value to encode.
-    :type value: long, int.
-    :returns: str.
+    :param long or int value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, long) and not isinstance(value, int):
@@ -110,9 +105,8 @@ def long_long_int(value):
 def long_string(value):
     """Encode a string.
 
-    :param value: Value to encode.
-    :type value: str.
-    :returns: str.
+    :param str value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, basestring):
@@ -123,9 +117,8 @@ def long_string(value):
 def octet(value):
     """Encode an octet value.
 
-    :param value: Value to encode.
-    :type value: int.
-    :returns: str.
+    :param value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, int):
@@ -136,9 +129,8 @@ def octet(value):
 def short_int(value):
     """Encode a short integer.
 
-    :param value: Value to encode.
-    :type value: int.
-    :returns: str.
+    :param int value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, int):
@@ -151,9 +143,8 @@ def short_int(value):
 def short_string(value):
     """ Encode a string.
 
-    :param value: Value to encode.
-    :type value: str.
-    :returns: str.
+    :param str value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, basestring):
@@ -164,9 +155,8 @@ def short_string(value):
 def timestamp(value):
     """Encode a datetime.datetime object or time.struct_time.
 
-    :param value: Value to encode.
-    :type value: datetime.datetime or time.struct_time value.
-    :returns: str.
+    :param datetime.datetime or time.struct_time value value: Value to encode
+    :rtype: str
 
     """
     if isinstance(value, datetime.datetime):
@@ -179,9 +169,8 @@ def timestamp(value):
 def field_array(value):
     """Encode a field array from a dictionary.
 
-    :param value: Value to encode.
-    :type value: list.
-    :returns: str.
+    :param list value: Value to encode
+    :rtype: str
 
     """
     if not isinstance(value, list):
@@ -198,9 +187,8 @@ def field_array(value):
 def field_table(value):
     """Encode a field table from a dictionary.
 
-    :param value: Value to encode.
-    :type value: dict.
-    :returns: str.
+    :param dict value: Value to encode
+    :rtype: str
 
     """
     # If there is no value, return a standard 4 null bytes
@@ -229,12 +217,10 @@ def table_integer(value):
     """Determines the best type of numeric type to encode value as, preferring
     the smallest data size first.
 
-    :param value: Value to encode.
-    :type value: int, long.
-    :returns: str.
+    :param int or long value: Value to encode
+    :rtype: str
 
     """
-    print value
     # Send the appropriately sized data value
     if -32768 < value < 32767:
         return 'U' + short_int(int(value))
@@ -247,11 +233,10 @@ def table_integer(value):
 
 
 def encode_table_value(value):
-    """Takes a value of any type and tries to encode it with the proper encoder.
+    """Takes a value of any type and tries to encode it with the proper encoder
 
-    :param value: Value to encode.
-    :type value: mixed.
-    :returns: str.
+    :param any value: Value to encode
+    :rtype: str
 
     """
     # Determine the field type and encode it
@@ -281,15 +266,14 @@ def encode_table_value(value):
     # Return the encoded value
     return result
 
+
 def by_type(value, data_type):
     """Takes a value of any type and tries to encode it with the specified
     encoder.
 
-    :param value: Value to encode.
-    :type value: mixed.
-    :param data_type: type of data to encode
-    :type data_type: str.
-    :returns: str.
+    :param any value: Value to encode
+    :param str data_type: type of data to encode
+    :rtype: str
 
     """
     # Determine the field type and encode it
