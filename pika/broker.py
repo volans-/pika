@@ -10,7 +10,7 @@ __since__ = '2012-03-25'
 
 import logging
 from pika.amqp import connection
-from pika.amqp import io
+from pika import io
 from pika.amqp import specification
 from pika.adapters import blocking
 
