@@ -7,3 +7,4 @@ dist
 pika.egg-info/
 codegen/*.json
 codegen/amqp*.xml
+atlassian-ide-plugin.xml
