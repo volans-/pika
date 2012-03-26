@@ -30,7 +30,7 @@ setup(name='pika',
                 'pika.codec',
                 'pika.interfaces'],
       extras_require={'Tornado' : ['tornado']},
-      setup_requires=['nose>=1.0', 'mock', 'unittest2', 'coverage', 'pylint', 'pep8'],
+      setup_requires=['nosexcover', 'mock', 'unittest2', 'coverage', 'pylint', 'pep8'],
       test_suite = "nose.collector",
       license='MPL v1.1 and GPL v2.0 or newer',
       classifiers=[
