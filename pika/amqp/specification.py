@@ -86,6 +86,14 @@ class Frame(object):
     index = 0
     name = 'Frame'
 
+    def __repr__(self):
+        """Return the representation of the frame object
+
+        :return: str
+
+        """
+        return '<%s.%s object at %s>' % (__name__, self.name, hex(id(self)))
+
     def demarshal(self, data):
         """
         Dynamically decode the frame data applying the values to the method
