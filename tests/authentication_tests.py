@@ -70,4 +70,4 @@ def test_import():
     try:
         from pika.authentication import PlainAuth
     except ImportError:
-        assert False, 'Could not import PlainAuth from pika.authentication'  
+        assert False, 'Could not import PlainAuth from pika.authentication'
