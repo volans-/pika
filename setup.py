@@ -24,6 +24,7 @@ setup(name='pika',
       author_email='tonygarnockjones@gmail.com, gmr@myyearbook.com',
       url='http://pika.github.com/',
       packages=['pika'],
+      extras_require={'Tornado' : ['tornado']},
       license='MPL v1.1 and GPL v2.0 or newer',
       classifiers=[
         'Development Status :: 3 - Alpha',
@@ -35,5 +36,5 @@ setup(name='pika',
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries',
         ],
-        zip_safe=True
+        zip_safe=True,
       )

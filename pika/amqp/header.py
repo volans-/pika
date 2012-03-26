@@ -148,4 +148,3 @@ class ContentHeader(object):
 
         # Return the bytes consumed and the flags
         return bytes_consumed, flags
-

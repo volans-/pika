@@ -1,8 +1,3 @@
-# ***** BEGIN LICENSE BLOCK *****
-#
-# For copyright and licensing please refer to COPYING.
-#
-# ***** END LICENSE BLOCK *****
 """
 An AMQP Connection Encapsulation Object
 
@@ -12,81 +7,75 @@ __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-10-16'
 
 import logging
-import socket
-import StringIO
 
-from pika.amqp import io
+from pika import authentication
+from pika.amqp import header
+from pika.amqp import specification
+
 
 class Connection(object):
-    """The connection object is not intended for end-developer usage but rather
-    as a common Connection state management object to be used by Pika itself.
+    """Manages the AMQP connection state for the given adapter."""
 
-    """
-    def __init__(self, broker):
+    BASE_CHANNEL = 0
 
-        self._broker = broker
+    def __init__(self, adapter):
+        """Create the connection object passing in the adapter for reading
+        and writing raw data.
 
-
-class Broker(object):
-    """The broker object defines the attributes about the broker pika is to
-    communicate with.
-
-    """
-    def __init__(self, host='localhost', port=5672, vhost='/'):
-        """Create a new instance of a broker that can be used for connections
-        to RabbitMQ.
-
-        :param str host: The broker hostname or IP address
-        :param int port: The broker port to connect on, default: 5672
-        :param str vhost: The virtual-host on the broker to connect to
+        :param pika.adapters.base.Adapter adapter: The adapter
 
         """
-        self._logger = logging.getLogger('pika.amqp.connection')
+        self._logger = logging.getLogger(__name__)
+        self._adapter = adapter
 
-        # Specify our default parameters
-        self._host = host
-        self._port = port
-        self._vhost = vhost
+        # By default we have no authenticating object
+        self._authenticator = None
 
-        # Create a socket
-        # Create our socket and set our socket options
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        self._socket.setsockopt(socket.SOL_TCP, socket.TCP_NODELAY, 1)
-
-        # Create a new IO handler
-        self._io = io.SocketIO(self._socket)
-
-        # Create an output buffer
-        self._buffer = StringIO.StringIO()
-
-        # Send our open frame, then start the IOLoop
-
-    def open(self):
-        """Open the connection to the broker
-
-        """
-        self._socket.connect((self._host, self._port))
+        # Not connected by default
+        self._connected = False
 
     @property
-    def select_io(self):
-        """Return the io.SelectIO object
+    def connected(self):
+        """Return the connection state.
 
-        :returns io.select_io:
+        :return: bool
 
         """
-        return self._io
+        return self._connected
+
+    def open(self, username=None, password=None):
+        """Open the connection to the broker, using the specified username
+        and password if no authenticator was previously set.
+
+        :param str username: The username to connect as if using PlainAuth
+        :param str password: The password to use if using PlainAuth.
+
+        """
+        if not self._authenticator:
+            self._authenticator = authentication.PlainAuth(username, password)
+
+        # Tell the Adapter Object to connect
+        if self._adapter.connect():
+            self._send_protocol_header()
 
     def send_frame(self, amqp_frame):
+        """Send the frame to the IO object.
 
+        :param amqp.frame.Frame amqp_frame: The frame to send.
+
+        """
         self._logger.debug('Writing frame: %r', amqp_frame)
-        # Append the frame to our buffer
-        self._buffer.write(amqp_frame.marshal())
+
+        # Send the frame to the IO object
+        self._adapter.send(amqp_frame.marshal())
 
 
-class SSLBroker(Broker):
-    """The SSL broker extends the Broker object adding the various additional
-    configuration knobs that a Broker needs to connect via SSL.
+    def _send_protocol_header(self):
+        """Send the protocol header to the remote server."""
+        self.send_frame(header.ProtocolHeader())
+        self._adapter.add_callback(self.BASE_CHANNEL,
+                                   specification.Connection.Start,
+                                   self.on_protocol_header)
 
-    """
-    def __init__(self, host='localhost', port=5672, vhost='/'):
-        Broker.__init__(self, host, port, vhost)
+    def on_protocol_header(self, channel, response):
+        self._logger.debug('Received %r', response)

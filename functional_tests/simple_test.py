@@ -8,11 +8,9 @@ __date__ = '2011-10-16'
 
 import sys
 sys.path.insert(0, '..')
-
 import logging
-
-from pika import RabbitMQ
+import pika
 
 logging.basicConfig(level=logging.DEBUG)
-rabbitmq = RabbitMQ()
-print rabbitmq
+rabbitmq = pika.Broker()
+rabbitmq.open()

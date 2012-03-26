@@ -1,83 +1,69 @@
-# ***** BEGIN LICENSE BLOCK *****
-#
-# For copyright and licensing please refer to COPYING.
-#
-# ***** END LICENSE BLOCK *****
 """
-A Base IOLoop that may be extended by others
+base.py
 
 """
+
 __author__ = 'Gavin M. Roy'
 __email__ = 'gmr@myyearbook.com'
-__date__ = '2011-10-16'
+__since__ = '2012-03-25'
 
-import hashlib
 import logging
 
-# Use epoll's constants to keep life easy
-READ = 0x0001
-WRITE = 0x0004
-ERROR = 0x0008
+from pika import callback_manager
+from pika.amqp import frame
 
 
-class IOLoop(object):
+
+class Adapter(object):
+    """Base adapter object"""
 
     def __init__(self):
-        """Create an IOLoop object."""
         self._logger = logging.getLogger(__name__)
-        self._file_descriptors = set()
-        self._deadlines = dict()
-        self._events = dict()
+        self._io = None
+        # Create a callback manager object
+        self._callbacks = self._callback_manager()
 
-    def add_timeout(self, deadline, callback):
-        """Add a timeout to the IOLoop returning an ID for the specific
-        timeout event which may be referenced for removal or logging purposes.
+    def add_callback(self, channel, frame, callback):
+        """Add the method specified to the callback data structure for the
+        given channel and frame type.
 
-        :param int deadline: Add timeout event that executes the
-                             callback when deadline is reached
-        :param method callback: Method to call when the deadline is reached
-        :returns str: Timeout ID
-
-        """
-        self._logger.error('IOLoop.add_timeout called without being extended')
-
-    def remove_timeout(self, timeout_id):
-        """Remove a timeout to the IOLoop
-
-        :param str timeout_id: The timeout ID to remove from the IOLoop if
-                               the timeout has not fired yet
-        :returns bool: Success/failure
+        :param int channel: Channel number
+        :param any frame: The frame obj or class to add the callback for
+        :param function callback: The method to add the callback for
 
         """
-        self._logger.error('IOLoop.remove_timeout called without being '
-                           'extended')
-        return False
+        self._callbacks.add(channel, frame, callback)
 
-    def start(self):
-        """Start the IOLoop"""
-        self._logger.error('IOLoop.start called without being extended')
+    def connect(self):
+        return self._io.connect()
 
-    def stop(self):
-        """Start the IOLoop"""
-        self._logger.error('IOLoop.start called without being extended')
+    def on_read_ready(self):
+        return self._io.read()
 
-    def set_events(self, file_descriptor, event_mask):
-        """Pass in the events to process
+    def on_send_ready(self):
+        self._io.sendall()
 
-        :param int file_descriptor: The file descriptor to set events for
-        :param int event_mask: A bitmask of the events to register
+    def demarshal(self, data):
+
+        bytes, channel, value = frame.demarshal(data)
+
+        return channel, value
+
+
+
+    def read(self):
+        raise NotImplementedError
+
+    def send(self, value):
+        self._io.write(value)
+
+    def set_io(self, io):
+        self._io = io
+
+    def _callback_manager(self):
+        """Return an callback manager object.
+
+        :return: pika.callback_manager.CallbackManager
 
         """
-        self._logger.error('IOLoop.set_events called without being extended')
-
-    def _get_timeout_id(self, deadline, callback):
-        """Returns an ID specific to the callback.
-
-        :param int deadline: The deadline for the callback
-        :param method callback: The callback that will be executed
-        :returns str: The timeout to use
-
-        """
-        timeout_id = hashlib.md5()
-        timeout_id.update('%i-%r', deadline, callback)
-        return str(timeout_id.hexdigest())
+        return callback_manager.CallbackManager()
