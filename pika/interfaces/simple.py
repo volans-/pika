@@ -12,7 +12,6 @@ __email__ = 'gmr@myyearbook.com'
 __date__ = '2011-10-16'
 
 from pika.amqp import connection
-from pika.adapters import select_ioloop
 from pika.authentication import plain
 from pika.amqp import header
 
