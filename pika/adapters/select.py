@@ -10,7 +10,7 @@ import select
 from . import base
 
 
-class SelectIOLoop(base.IOLoop):
+class IOLoop(base.IOLoop):
     """A SelectIOLoop for notifications of read, write and error events."""
     ERROR = base.ERROR
     READ = base.READ
