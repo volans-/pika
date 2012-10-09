@@ -180,6 +180,11 @@ class IOLoopReactorAdapter(object):
     Accepts a TwistedConnection object and a Twisted reactor object.
 
     """
+    # Use epoll's constants to keep life easy
+    READ = 0x0001
+    WRITE = 0x0004
+    ERROR = 0x0008
+
     def __init__(self, connection, reactor):
         self.connection = connection
         self.reactor = reactor
@@ -193,8 +198,7 @@ class IOLoopReactorAdapter(object):
         :rtype: twisted.internet.interfaces.IDelayedCall
 
         """
-        secs = deadline - time.time()
-        return self.reactor.callLater(secs, callback)
+        return self.reactor.callLater(deadline, callback)
 
     def remove_timeout(self, call):
         """Remove a call
@@ -232,10 +236,10 @@ class IOLoopReactorAdapter(object):
         self.reactor.removeReader(self.connection)
         self.reactor.removeWriter(self.connection)
 
-        if event_state & base_connection.READ:
+        if event_state & self.READ:
             self.reactor.addReader(self.connection)
 
-        if event_state & base_connection.WRITE:
+        if event_state & self.WRITE:
             self.reactor.addWriter(self.connection)
 
 
@@ -259,7 +263,7 @@ class TwistedConnection(base_connection.BaseConnection):
     def _adapter_connect(self):
         """Connect to the RabbitMQ broker"""
         # Connect (blockignly!) to the server
-        super(base_connection.BaseConnection, self)._adapter_connect()
+        super(TwistedConnection, self)._adapter_connect()
 
         # Create an I/O loop by adapting the Twisted reactor
         self.ioloop = IOLoopReactorAdapter(self, reactor)
@@ -295,12 +299,12 @@ class TwistedConnection(base_connection.BaseConnection):
 
     def channel(self, channel_number=None):
         """Return a Deferred that fires with an instance of a wrapper around the
-        Pika Channel class.
+        Pika Channel class.#
 
         """
         d = defer.Deferred()
-        base_connection.BaseConnection.channel(self, d.callback, channel_number)
-        return d.addCallback(TwistedChannel)
+        super(TwistedConnection, self).channel(d.callback, channel_number)
+        d.addCallback(TwistedChannel)
 
     # IReadWriteDescriptor methods
 
@@ -384,7 +388,8 @@ class TwistedProtocolConnection(base_connection.BaseConnection):
 
         """
         d = defer.Deferred()
-        base_connection.BaseConnection.channel(self, d.callback, channel_number)
+        super(TwistedProtocolConnection, self).channel(d.callback,
+                                                       channel_number)
         return d.addCallback(TwistedChannel)
 
     # IProtocol methods
