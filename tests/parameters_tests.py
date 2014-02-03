@@ -380,7 +380,7 @@ class ParametersSSLTests(unittest.TestCase):
         self.assertEqual(self.parameters.credentials.password, 'guest')
 
     def test_ssl_options_ssl_version(self):
-        self.assertEqual(self.parameters.ssl_options['ssl_version'], 2)
+        self.assertEqual(self.parameters.ssl_options['ssl_version'], 1)
 
 
 class ParametersDefaultTests(unittest.TestCase):
