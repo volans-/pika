@@ -1,55 +1,52 @@
-# ***** BEGIN LICENSE BLOCK *****
-#
-# For copyright and licensing please refer to COPYING.
-#
-# ***** END LICENSE BLOCK *****
 from setuptools import setup
 import os
-import platform
+import sys
+
+# Base Requirements
+requirements = ['pamqp']
 
 # Conditionally include additional modules for docs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-requirements = ['pamqp']
 if on_rtd:
-    requirements.append('pyev')
+    #requirements.append('pyev') Won't work if libev is not installed
     requirements.append('tornado')
     requirements.append('twisted')
 
 # Conditional include unittest2 for versions of python < 2.7
 tests_require = ['nose', 'mock', 'pyyaml']
-platform_version = list(platform.python_version_tuple())[0:2]
-if platform_version[0] != '3' and platform_version != ['2', '7']:
+if sys.version_info < (2, 7, 0):
     tests_require.append('unittest2')
 
-long_description = ('Pika is a pure-Python implementation of the AMQP 0-9-1 '
-                    'protocol that tries to stay fairly independent of the '
-                    'underlying network support  library. Pika was developed '
-                    'primarily for use with RabbitMQ, but should also work '
-                    'with other AMQP 0-9-1 brokers.')
 
 setup(name='pika',
       version='0.10.0',
-      description='Pika Python AMQP Client Library',
-      long_description=long_description,
+      description='Pure-Python RabbitMQ Client Library',
+      long_description=open('README.rst').read(),
       maintainer='Gavin M. Roy',
       maintainer_email='gavinmroy@gmail.com',
       url='https://pika.readthedocs.org ',
       packages=['pika', 'pika.adapters'],
-      license='MPL v1.1 and GPL v2.0 or newer',
+      package_data={'': ['LICENSE', 'README.rst']},
+      license='MPL v2.0',
       install_requires=requirements,
+      include_package_data=True,
       extras_require={'tornado': ['tornado'],
                       'twisted': ['twisted'],
                       'libev': ['pyev']},
       tests_require=tests_require,
       test_suite='nose.collector',
       classifiers=[
-          'Development Status :: 5 - Production/Stable',
+          'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
           'Natural Language :: English',
           'Operating System :: OS Independent',
+          'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.2',
+          'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Topic :: Communications',
