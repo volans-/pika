@@ -22,13 +22,26 @@ logging.getLogger(__name__).addHandler(NullHandler())
 from pika.connection import ConnectionParameters
 from pika.connection import URLParameters
 from pika.credentials import PlainCredentials
-from pika.spec import BasicProperties
 
-from pika.adapters import BaseConnection
 from pika.adapters import AsyncoreConnection
 from pika.adapters import BlockingConnection
-from pika.adapters import SelectConnection
-from pika.adapters import TornadoConnection
-from pika.adapters import TwistedConnection
-from pika.adapters import LibevConnection
 
+# These require external dependencies
+
+# LibEv - http://software.schmorp.de/pkg/libev.html
+try:
+    from pika.adapters import LibevConnection
+except ImportError:
+    pass
+
+# Tornado - http://www.tornadoweb.org
+try:
+    from pika.adapters import TornadoConnection
+except ImportError:
+    pass
+
+# Twisted - https://twistedmatrix.com/trac/
+try:
+    from pika.adapters import TwistedConnection
+except ImportError:
+    pass
