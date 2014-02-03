@@ -1,5 +1,4 @@
 from pamqp import specification
-import ssl
 import sys
 try:
     import unittest2 as unittest
@@ -267,7 +266,7 @@ class BaseValidationTests(unittest.TestCase):
         self.assertTrue(parameters.Base.validate_ssl_options(value))
 
     def test_ssl_options_valid_ssl_version(self):
-        value = {'ssl_version': ssl.PROTOCOL_SSLv3}
+        value = {'ssl_version': 2}
         self.assertTrue(parameters.Base.validate_ssl_options(value))
 
     def test_ssl_options_invalid_int(self):
@@ -359,9 +358,7 @@ class ParametersSSLTests(unittest.TestCase):
     def setUp(self):
         creds = credentials.PlainCredentials('foo', 'bar')
         self.parameters = parameters.Parameters('qux', ssl=True,
-                                                ssl_options=
-                                                {'ssl_version':
-                                                     ssl.PROTOCOL_SSLv3})
+                                                ssl_options= {'ssl_version': 1})
 
     def test_scheme(self):
         self.assertTrue(self.parameters.ssl)
@@ -383,8 +380,8 @@ class ParametersSSLTests(unittest.TestCase):
         self.assertEqual(self.parameters.credentials.password, 'guest')
 
     def test_ssl_options_ssl_version(self):
-        self.assertEqual(self.parameters.ssl_options['ssl_version'],
-                         ssl.PROTOCOL_SSLv3)
+        self.assertEqual(self.parameters.ssl_options['ssl_version'], 2)
+
 
 class ParametersDefaultTests(unittest.TestCase):
 
@@ -586,5 +583,4 @@ class AMQPSOptionsTests(unittest.TestCase):
         self.assertEqual(self.parameters.credentials.password, 'guest')
 
     def test_ssl_options_ssl_version(self):
-        self.assertEqual(self.parameters.ssl_options['ssl_version'],
-                         ssl.PROTOCOL_SSLv3)
+        self.assertEqual(self.parameters.ssl_options['ssl_version'], 1)
