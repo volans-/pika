@@ -10,11 +10,17 @@ import ssl
 from pika.connection import credentials as creds
 from pika import utils
 
+DEFAULT_PORT = 5672
+DEFAULT_SSL_PORT = 5671
+DEFAULT_VIRTUAL_HOST = '/'
+
 
 class Base(object):
     """Base connection parameters class definition
 
     """
+
+
     backpressure_detection = False
     connection_attempts = 1
     channel_max = 0
@@ -23,13 +29,13 @@ class Base(object):
     host = 'localhost'
     locale = 'en_US'
     password = 'guest'
-    port = 5672
+    port = DEFAULT_PORT
     retry_delay = 2.0
     socket_timeout = 0.25
     ssl = False
     ssl_options = dict({})
     username = 'guest'
-    virtual_host = '/'
+    virtual_host = DEFAULT_VIRTUAL_HOST
 
     VALID_SSL_OPTIONS = ['keyfile', 'certfile', 'server_side', 'cert_reqs',
                          'ssl_version', 'ca_certs', 'do_handshake_on_connect',
@@ -58,7 +64,7 @@ class Base(object):
     def validate_backpressure(value):
         """Validate that the backpressure detection option is a bool.
 
-        :param bool backpressure_detection: The backpressure detection value
+        :param bool value: The backpressure detection value
         :rtype: bool
         :raises: TypeError
 
@@ -209,7 +215,7 @@ class Base(object):
     def validate_socket_timeout(value):
         """Validate that the socket_timeout value is an int or float
 
-        :param int|float socket_timeout: The value to validate
+        :param int|float value: The value to validate
         :rtype: bool
         :raises: TypeError
 
@@ -368,6 +374,8 @@ class Parameters(Base):
 
         if ssl is not None and self.validate_ssl(ssl):
             self.ssl = ssl
+            if ssl and not port:
+                self.port = DEFAULT_SSL_PORT
 
         if ssl_options and self.validate_ssl_options(ssl_options):
             self.ssl_options = ssl_options or dict()
@@ -424,10 +432,6 @@ class URLParameters(Base):
     :param str url: The AMQP URL to connect to
 
     """
-    DEFAULT_PORT = 5672
-    DEFAULT_SSL_PORT = 5671
-    DEFAULT_VIRTUAL_HOST = '/'
-
     def __init__(self, url):
 
         """Create a new URLParameters instance.
@@ -448,8 +452,7 @@ class URLParameters(Base):
         if parts.port and self.validate_port(parts.port):
             self.port = parts.port
         else:
-            self.port = (self.DEFAULT_PORT if not self.ssl else
-                         self.DEFAULT_SSL_PORT)
+            self.port = (DEFAULT_PORT if not self.ssl else DEFAULT_SSL_PORT)
 
         # Handle authentication credentials
         if parts.username:
@@ -460,7 +463,7 @@ class URLParameters(Base):
 
         # Get the Virtual Host
         if len(parts.path) <= 1:
-            self.virtual_host = self.DEFAULT_VIRTUAL_HOST
+            self.virtual_host = DEFAULT_VIRTUAL_HOST
         else:
             path_parts = parts.path.split('/')
             virtual_host = utils.unquote(path_parts[1])
