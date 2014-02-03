@@ -19,11 +19,16 @@ except ImportError:
 # Add NullHandler to prevent logging warnings
 logging.getLogger(__name__).addHandler(NullHandler())
 
-"""
-from pika.connection import ConnectionParameters
-from pika.connection import URLParameters
-from pika.credentials import PlainCredentials
+# Convenience Includes
+from pika.connection.credentials import PlainCredentials, ExternalCredentials
+from pika.connection.parameters import Parameters, URLParameters
 
+# Compatibility Includes
+from pika.connection.parameters import Parameters as ConnectionParameters
+from pika.connection import credentials
+
+
+"""
 from pika.adapters import AsyncoreConnection
 from pika.adapters import BlockingConnection
 
