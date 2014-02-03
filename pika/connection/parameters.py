@@ -19,11 +19,10 @@ SSL_PROTOCOLS = [0, 1, 2, 3]
 
 
 class Base(object):
-    """Base connection parameters class definition
+    """Base connection parameters class definition that assigns the default
+    values for a connection's parameters object.
 
     """
-
-
     backpressure_detection = False
     connection_attempts = 1
     channel_max = 0
