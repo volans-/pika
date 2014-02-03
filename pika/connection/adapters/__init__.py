@@ -20,6 +20,7 @@
   with the libev event loop and employing nonblocking IO
 
 """
+"""
 from base_connection import BaseConnection
 from asyncore_connection import AsyncoreConnection
 from blocking_connection import BlockingConnection
@@ -44,3 +45,4 @@ try:
 except ImportError:
     LibevConnection = None
 
+"""
