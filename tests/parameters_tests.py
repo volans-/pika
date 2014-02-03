@@ -14,6 +14,11 @@ class BaseDefaultTests(unittest.TestCase):
     def setUp(self):
         self.parameters = parameters.Base()
 
+    def test_repr(self):
+        self.assertEqual(repr(self.parameters),
+                         '<Base host=localhost port=5672 virtual_host=/ '
+                         'ssl=False>')
+
     def test_backpressure_detection(self):
         self.assertFalse(self.parameters.backpressure_detection)
 
@@ -96,6 +101,16 @@ class BaseValidationTests(unittest.TestCase):
                           parameters.Base.validate_channel_max,
                           '10')
 
+    def test_channel_max_too_low(self):
+        self.assertRaises(ValueError,
+                          parameters.Base.validate_channel_max,
+                          -1)
+
+    def test_channel_max_too_high(self):
+        self.assertRaises(ValueError,
+                          parameters.Base.validate_channel_max,
+                          204800)
+
     def test_connection_attempts_int(self):
         self.assertTrue(parameters.Base.validate_connection_attempts(10))
 
@@ -113,6 +128,11 @@ class BaseValidationTests(unittest.TestCase):
         self.assertRaises(TypeError,
                           parameters.Base.validate_connection_attempts,
                           '10')
+
+    def test_connection_attempts_too_low(self):
+        self.assertRaises(ValueError,
+                          parameters.Base.validate_connection_attempts,
+                          -1)
 
     def test_credentials_external(self):
         value = credentials.ExternalCredentials()
@@ -170,6 +190,11 @@ class BaseValidationTests(unittest.TestCase):
                           parameters.Base.validate_heartbeat_interval,
                           '10')
 
+    def test_heartbeat_interval_too_low(self):
+        self.assertRaises(ValueError,
+                          parameters.Base.validate_heartbeat_interval,
+                          -1)
+
     def test_host_bytes(self):
         self.assertTrue(parameters.Base.validate_host(b'foo'))
 
@@ -226,6 +251,11 @@ class BaseValidationTests(unittest.TestCase):
     def test_retry_delay_invalid_str(self):
         self.assertRaises(TypeError, parameters.Base.validate_retry_delay, '10')
 
+    def test_retry_delay_too_low(self):
+        self.assertRaises(ValueError,
+                          parameters.Base.validate_retry_delay,
+                          -1)
+
     def test_socket_timeout_int(self):
         self.assertTrue(parameters.Base.validate_socket_timeout(10))
 
@@ -239,6 +269,11 @@ class BaseValidationTests(unittest.TestCase):
     def test_socket_timeout_invalid_str(self):
         self.assertRaises(TypeError, parameters.Base.validate_socket_timeout,
                           '10')
+
+    def test_socket_timeout_too_low(self):
+        self.assertRaises(ValueError,
+                          parameters.Base.validate_socket_timeout,
+                          -1)
 
     def test_ssl_true(self):
         self.assertTrue(parameters.Base.validate_ssl(True))
@@ -307,7 +342,12 @@ class ParametersTests(unittest.TestCase):
         creds = credentials.PlainCredentials('foo', 'bar')
         self.parameters = parameters.Parameters('qux', 5673, 'corgie', creds,
                                                 200, 32768, 120, False, None,
-                                                5, 3, 10, 'en_UK')
+                                                5, 3, 10, 'en_UK', True)
+
+    def test_repr(self):
+        self.assertEqual(repr(self.parameters),
+                         '<Parameters host=qux port=5673 virtual_host=corgie '
+                         'ssl=False>')
 
     def test_scheme(self):
         self.assertFalse(self.parameters.ssl)
@@ -352,13 +392,20 @@ class ParametersTests(unittest.TestCase):
     def test_locale(self):
         self.assertEqual(self.parameters.locale, 'en_UK')
 
+    def test_backpressure_detection(self):
+        self.assertTrue(self.parameters.backpressure_detection)
+
 
 class ParametersSSLTests(unittest.TestCase):
 
     def setUp(self):
-        creds = credentials.PlainCredentials('foo', 'bar')
         self.parameters = parameters.Parameters('qux', ssl=True,
                                                 ssl_options= {'ssl_version': 1})
+
+    def test_repr(self):
+        self.assertEqual(repr(self.parameters),
+                         '<Parameters host=qux port=5671 virtual_host=/ '
+                         'ssl=True>')
 
     def test_scheme(self):
         self.assertTrue(self.parameters.ssl)
@@ -432,6 +479,9 @@ class ParametersDefaultTests(unittest.TestCase):
     def test_locale(self):
         self.assertEqual(self.parameters.locale, 'en_US')
 
+    def test_backpressure_detection(self):
+        self.assertFalse(self.parameters.backpressure_detection)
+
 
 class DefaultAMQPTests(unittest.TestCase):
 
@@ -490,12 +540,16 @@ class DefaultAMQPTests(unittest.TestCase):
     def test_locale(self):
         self.assertEqual(self.parameters.locale, 'en_US')
 
+    def test_backpressure_detection(self):
+        self.assertFalse(self.parameters.backpressure_detection)
+
 
 class AMQPOptionsTests(unittest.TestCase):
 
     URL = 'amqp://foo:bar@qux:5673/corgie?heartbeat_interval=120&' \
           'connection_attempts=5&channel_max=200&frame_max=32768&' \
-          'locale=en_UK&retry_delay=3&socket_timeout=10'
+          'locale=en_UK&retry_delay=3&socket_timeout=10&' \
+          'backpressure_detection=t'
 
     def setUp(self):
         self.parameters = parameters.URLParameters(self.URL)
@@ -549,10 +603,14 @@ class AMQPOptionsTests(unittest.TestCase):
     def test_locale(self):
         self.assertEqual(self.parameters.locale, 'en_UK')
 
+    def test_backpressure_detection(self):
+        self.assertTrue(self.parameters.backpressure_detection)
+
 
 class AMQPSOptionsTests(unittest.TestCase):
 
-    URL = 'amqps://localhost/%2f?ssl=t&ssl_options=%7B%27ssl_version%27%3A+1%7D'
+    URL = 'amqps://localhost/%2f?ssl=t&ssl_options=%7B%27ssl_version%27%3A+1%' \
+          '7D&backpressure_detection=f'
 
     def setUp(self):
         self.parameters = parameters.URLParameters(self.URL)
@@ -584,3 +642,6 @@ class AMQPSOptionsTests(unittest.TestCase):
 
     def test_ssl_options_ssl_version(self):
         self.assertEqual(self.parameters.ssl_options['ssl_version'], 1)
+
+    def test_backpressure_detection(self):
+        self.assertFalse(self.parameters.backpressure_detection)

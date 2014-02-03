@@ -206,11 +206,14 @@ class Base(object):
         :param int|float value: The value to validate
         :rtype: bool
         :raises: TypeError
+        :raises: ValueError
 
         """
         if not any([isinstance(value, int),
                     isinstance(value, float)]):
             raise TypeError('retry_delay must be a float or int')
+        if not value >= 0:
+            raise ValueError('retry_delay must be >= 0')
         return True
 
     @staticmethod
@@ -220,6 +223,7 @@ class Base(object):
         :param int|float value: The value to validate
         :rtype: bool
         :raises: TypeError
+        :raises: ValueError
 
         """
         if not any([isinstance(value, int),
