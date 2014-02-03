@@ -5,7 +5,7 @@
 # this package.
 #
 # ***** END LICENSE BLOCK *****
-__version__ = '0.9.14p0'
+__version__ = '0.10.0'
 
 import logging
 try:

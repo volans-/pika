@@ -9,7 +9,7 @@ import platform
 
 # Conditionally include additional modules for docs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-requirements = list()
+requirements = ['pamqp']
 if on_rtd:
     requirements.append('tornado')
     requirements.append('twisted')
@@ -28,7 +28,7 @@ long_description = ('Pika is a pure-Python implementation of the AMQP 0-9-1 '
                     'with other AMQP 0-9-1 brokers.')
 
 setup(name='pika',
-      version='0.9.14p0',
+      version='0.10.0',
       description='Pika Python AMQP Client Library',
       long_description=long_description,
       maintainer='Gavin M. Roy',
@@ -45,8 +45,7 @@ setup(name='pika',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Intended Audience :: Developers',
-          'License :: OSI Approved :: GNU General Public License (GPL)',
-          'License :: OSI Approved :: Mozilla Public License 1.1 (MPL 1.1)',
+          'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
           'Natural Language :: English',
           'Operating System :: OS Independent',
           'Programming Language :: Python :: 2.6',
