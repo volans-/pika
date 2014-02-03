@@ -300,5 +300,3 @@ class BaseValidationTests(unittest.TestCase):
     def test_virtual_host_invalid_none(self):
         self.assertRaises(TypeError, parameters.Base.validate_virtual_host,
                           None)
-
-

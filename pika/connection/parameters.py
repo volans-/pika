@@ -3,11 +3,11 @@ Connection parameters classes for validating the options passed to a connection
 when creating it.
 
 """
+import ast
 from pamqp import specification
 import ssl
 
 from pika.connection import credentials as creds
-from pika import exceptions
 from pika import utils
 
 
@@ -364,7 +364,7 @@ class Parameters(Base):
 
         if (heartbeat_interval is not None and
                 self.validate_heartbeat_interval(heartbeat_interval)):
-            self.heartbeat = heartbeat_interval
+            self.heartbeat_interval = heartbeat_interval
 
         if ssl is not None and self.validate_ssl(ssl):
             self.ssl = ssl
@@ -496,27 +496,28 @@ class URLParameters(Base):
             self.channel_max = values['channel_max']
 
         if ('connection_attempts' in values and
-                self.validate_connection_attempts(values['connection_attempts'])):
+                self.validate_connection_attempts(
+                    values['connection_attempts'])):
             self.connection_attempts = values['connection_attempts']
 
         if ('frame_max' in values and
-            self.validate_frame_max(values['frame_max'])):
+                self.validate_frame_max(values['frame_max'])):
             self.frame_max = values['frame_max']
 
         if ('heartbeat_interval' in values and
-            self.validate_heartbeat_interval(values['heartbeat_interval'])):
-            self.heartbeat = values['heartbeat_interval']
+                self.validate_heartbeat_interval(values['heartbeat_interval'])):
+            self.heartbeat_interval = values['heartbeat_interval']
 
         if ('locale' in values and
-            self.validate_locale(values['locale'])):
+                self.validate_locale(values['locale'])):
             self.locale = values['locale']
 
         if ('retry_delay' in values and
-            self.validate_retry_delay(values['retry_delay'])):
+                self.validate_retry_delay(values['retry_delay'])):
             self.retry_delay = values['retry_delay']
 
         if ('socket_timeout' in values and
-            self.validate_socket_timeout(values['socket_timeout'])):
+                self.validate_socket_timeout(values['socket_timeout'])):
             self.socket_timeout = values['socket_timeout']
 
         if 'ssl_options' in values:
