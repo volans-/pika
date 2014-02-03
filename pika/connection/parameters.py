@@ -5,7 +5,6 @@ when creating it.
 """
 import ast
 from pamqp import specification
-import ssl
 
 from pika.connection import credentials as creds
 from pika import utils
@@ -13,6 +12,10 @@ from pika import utils
 DEFAULT_PORT = 5672
 DEFAULT_SSL_PORT = 5671
 DEFAULT_VIRTUAL_HOST = '/'
+
+# Use numerical values so Travis-CI does not choke on the constants
+# PROTOCOL_SSLv2, PROTOCOL_SSLv23, PROTOCOL_SSLv3, PROTOCOL_TLSv1
+SSL_PROTOCOLS = [0, 1, 2, 3]
 
 
 class Base(object):
@@ -261,10 +264,7 @@ class Base(object):
                 raise ValueError('%s is not a valid SSL option' % key)
 
         if 'ssl_version' in values:
-            if values['ssl_version'] not in [ssl.PROTOCOL_SSLv2,
-                                             ssl.PROTOCOL_SSLv23,
-                                             ssl.PROTOCOL_SSLv3,
-                                             ssl.PROTOCOL_TLSv1]:
+            if values['ssl_version'] not in SSL_PROTOCOLS:
                 raise ValueError('ssl_version "%s" is not valid' %
                                  values['ssl_version'])
         return True
