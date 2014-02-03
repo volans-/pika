@@ -1,12 +1,16 @@
-# Pika, an AMQP 0-9-1 client library for Python
+Pika
+====
+A Pure-Python AMQP 0-9-1 client library with both synchronous and asynchronous
+connection adapters.
 
 [![PyPI version](https://badge.fury.io/py/pika.png)](http://badge.fury.io/py/pika) [![Downloads](https://pypip.in/d/pika/badge.png)](https://crate.io/packages/pika) [![Build Status](https://travis-ci.org/pika/pika.png?branch=master)](https://travis-ci.org/pika/pika)
 
-## Introduction
+Introduction
+------------
 Pika is a pure-Python implementation of the AMQP 0-9-1 protocol that tries
 to stay fairly independent of the underlying network support library.
 
- * Currently supports Python 2.6 and Python 2.7 only. 3.2+ support planned.
+ * Supports Python 2.6, 2.7, 3.2, & 3.3
 
  * Since threads aren't appropriate to every situation, it doesn't
    require threads. It takes care not to forbid them, either. The same
@@ -18,8 +22,17 @@ to stay fairly independent of the underlying network support library.
    python application. Pika tries to stay compatible with all of these, and to
    make adapting it to a new environment as simple as possible.
 
+## Pika provides the following adapters
+ * AsyncoreConnection - based off the standard Python library asyncore
+ * BlockingConnection - enables blocking, synchronous operation on top of
+                        library for simple uses
+ * LibevConnection    - adapter for use with the libev event loop http://libev.schmorp.de
+ * SelectConnection   - fast asynchronous adapter
+ * TornadoConnection  - adapter for use with the Tornado IO Loop http://tornadoweb.org
+ * TwistedConnection  - adapter for use with the Twisted asynchronous package http://twistedmatrix.com/
+
 ## Documentation
-Pika's documentation is now at https://pika.readthedocs.org
+Pika's documentation is available at https://pika.readthedocs.org
 
 ## Example
 Here is the most simple example of use, sending a message with the BlockingConnection adapter:
@@ -53,18 +66,8 @@ And an example of writing a blocking consumer:
     print 'Requeued %i messages' % requeued_messages
     connection.close()
 
-## Pika provides the following adapters
- * AsyncoreConnection - based off the standard Python library asyncore
- * BlockingConnection - enables blocking, synchronous operation on top of
-                        library for simple uses
- * SelectConnection   - fast asynchronous adapter
- * TwistedConnection  - adapter for use with the Twisted asynchronous package http://twistedmatrix.com/
- * TornadoConnection  - adapter for use with the Tornado IO Loop http://tornadoweb.org
- * LibevConnection    - adapter for use with the libev event loop http://libev.schmorp.de
-
 ## License
-Pika is licensed under the MPL, and may also be used under the terms
-of the GPL. The full license text is included with the source code for
-the package in the LICENSE-GPL-2.0 and LICENSE-MPL-Pika files. If you
-have any questions regarding licensing, please contact the RabbitMQ team
-at <info@rabbitmq.com>.
+This Source Code Form is subject to the terms of the Mozilla Public License,
+v. 2.0. For a full copy of the MPL v2.0, see the LICENSE file accompanying
+this package. If you have any questions regarding licensing, please contact
+the RabbitMQ team at <info@rabbitmq.com>.
