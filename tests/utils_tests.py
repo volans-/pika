@@ -70,6 +70,6 @@ class URLParsingTests(unittest.TestCase):
     def test_parse_qs(self):
         self.assertDictEqual(utils.parse_qs(self.QUERY),
                              {'heartbeat_interval': ['1']})
-        
+
     def test_unqoute(self):
         self.assertEqual(utils.unquote(self.PATH), '//')
