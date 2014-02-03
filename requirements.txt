@@ -1,0 +1,7 @@
+libev
+mock
+nose
+pamqp
+pyyaml
+tornado
+twisted
