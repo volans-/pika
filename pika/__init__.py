@@ -1,6 +1,8 @@
 # ***** BEGIN LICENSE BLOCK *****
 #
-# For copyright and licensing please refer to COPYING.
+# This Source Code Form is subject to the terms of the Mozilla Public License,
+# v. 2.0. For a full copy of the MPL v2.0, see the LICENSE file accompanying
+# this package.
 #
 # ***** END LICENSE BLOCK *****
 __version__ = '0.9.14p0'
