@@ -133,13 +133,3 @@ class MethodNotImplemented(AMQPError):
 class ChannelError(Exception):
     def __repr__(self):
         return 'An unspecified error occurred with the Channel'
-
-
-class InvalidMinimumFrameSize(ProtocolSyntaxError):
-    def __repr__(self):
-        return 'AMQP Minimum Frame Size is 4096 Bytes'
-
-
-class InvalidMaximumFrameSize(ProtocolSyntaxError):
-    def __repr__(self):
-        return 'AMQP Maximum Frame Size is 131072 Bytes'
