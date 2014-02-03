@@ -16,6 +16,9 @@ except ImportError:
         def emit(self, record):
             pass
 
+# Add NullHandler to prevent logging warnings
+logging.getLogger(__name__).addHandler(NullHandler())
+
 from pika.connection import ConnectionParameters
 from pika.connection import URLParameters
 from pika.credentials import PlainCredentials
@@ -29,5 +32,3 @@ from pika.adapters import TornadoConnection
 from pika.adapters import TwistedConnection
 from pika.adapters import LibevConnection
 
-# Add NullHandler to prevent logging warnings
-logging.getLogger(__name__).addHandler(NullHandler())
