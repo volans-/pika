@@ -19,6 +19,7 @@ except ImportError:
 # Add NullHandler to prevent logging warnings
 logging.getLogger(__name__).addHandler(NullHandler())
 
+"""
 from pika.connection import ConnectionParameters
 from pika.connection import URLParameters
 from pika.credentials import PlainCredentials
@@ -45,3 +46,4 @@ try:
     from pika.adapters import TwistedConnection
 except ImportError:
     pass
+"""
