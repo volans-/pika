@@ -1,7 +1,7 @@
-libev
 mock
 nose
 pamqp
+pyev
 pyyaml
 tornado
 twisted

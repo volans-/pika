@@ -11,9 +11,9 @@ import platform
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 requirements = ['pamqp']
 if on_rtd:
+    requirements.append('pyev')
     requirements.append('tornado')
     requirements.append('twisted')
-    requirements.append('pyev')
 
 # Conditional include unittest2 for versions of python < 2.7
 tests_require = ['nose', 'mock', 'pyyaml']
