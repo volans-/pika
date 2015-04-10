@@ -153,7 +153,7 @@ class LibevConnection(BaseConnection):
             self._io_watcher.start()
 
         return error
-        
+
     def _noop_callable(self, *args, **kwargs):
         pass
 
@@ -201,10 +201,9 @@ class LibevConnection(BaseConnection):
 
     def _reset_io_watcher(self):
         """Reset the IO watcher; retry as necessary
-        
         """
         self._io_watcher.stop()
-        
+
         retries = 0
         while True:
             try:
@@ -212,13 +211,14 @@ class LibevConnection(BaseConnection):
                     self._io_watcher.fd,
                     self._PIKA_TO_LIBEV_ARRAY[self.event_state]
                 )
-                
+
                 break
-            except: # sometimes the stop() doesn't complete in time
-                if retries > 5: raise
-                self._io_watcher.stop() # so try it again
+            except:  # sometimes the stop() doesn't complete in time
+                if retries > 5:
+                    raise
+                self._io_watcher.stop()  # so try it again
                 retries += 1
-                
+
         self._io_watcher.start()
 
     def _manage_event_state(self):

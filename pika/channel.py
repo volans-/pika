@@ -216,9 +216,8 @@ class Channel(object):
                                      no_ack=no_ack,
                                      exclusive=exclusive,
                                      arguments=arguments or dict()),
-                           self._on_eventok,
-                           [(spec.Basic.ConsumeOk,
-                             {'consumer_tag': consumer_tag})])
+                  self._on_eventok,
+                  [(spec.Basic.ConsumeOk, {'consumer_tag': consumer_tag})])
 
         return consumer_tag
 
@@ -399,7 +398,8 @@ class Channel(object):
         """
         self._validate_channel_and_callback(callback)
         if (self.connection.publisher_confirms is False or
-            self.connection.basic_nack is False):
+                self.connection.basic_nack is False):
+
             raise exceptions.MethodNotImplemented('Not Supported on Server')
 
         # Add the ack and nack callbacks
@@ -1079,7 +1079,6 @@ class Channel(object):
             raise ValueError('callback must be a function or method')
 
 
-
 class ContentFrameDispatcher(object):
     """Handle content related frames, building a message and return the message
     back in three parts upon receipt.
@@ -1104,7 +1103,8 @@ class ContentFrameDispatcher(object):
 
         """
         if (isinstance(frame_value, frame.Method) and
-            spec.has_content(frame_value.method.INDEX)):
+                spec.has_content(frame_value.method.INDEX)):
+
             self._method_frame = frame_value
         elif isinstance(frame_value, frame.Header):
             self._header_frame = frame_value

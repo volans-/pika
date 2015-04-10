@@ -50,7 +50,7 @@ def sanitize_prefix(function):
         offset = 1
         if 'prefix' in kwargs:
             kwargs['prefix'] = _name_or_value(kwargs['prefix'])
-        elif len(args) - 1  >= offset:
+        elif len(args) - 1 >= offset:
             args[offset] = _name_or_value(args[offset])
             offset += 1
         if 'key' in kwargs:
@@ -84,8 +84,7 @@ def check_for_prefix_and_key(function):
             key = _name_or_value(args[offset])
 
         # Make sure prefix and key are in the stack
-        if (prefix not in args[0]._stack or
-            key not in args[0]._stack[prefix]):
+        if prefix not in args[0]._stack or key not in args[0]._stack[prefix]:
             return False
 
         # Execute the method
@@ -144,8 +143,9 @@ class CallbackManager(object):
         # Check for a duplicate
         for callback_dict in self._stack[prefix][key]:
             if (callback_dict[self.CALLBACK] == callback and
-                callback_dict[self.ARGUMENTS] == arguments and
-                callback_dict[self.ONLY_CALLER] == only_caller):
+                    callback_dict[self.ARGUMENTS] == arguments and
+                    callback_dict[self.ONLY_CALLER] == only_caller):
+
                 if callback_dict[self.ONE_SHOT] is True:
                     callback_dict[self.CALLS] += 1
                     LOGGER.debug('Incremented callback reference counter: %r',
@@ -192,7 +192,7 @@ class CallbackManager(object):
         :rtype: None or int
 
         """
-        if not prefix in self._stack or not key in self._stack[prefix]:
+        if prefix not in self._stack or key not in self._stack[prefix]:
             return None
         return len(self._stack[prefix][key])
 
@@ -252,7 +252,8 @@ class CallbackManager(object):
                 callback_dict = self._stack[prefix][key][offset - 1]
 
                 if (callback_dict[self.CALLBACK] == callback_value and
-                    self._arguments_match(callback_dict, [arguments])):
+                        self._arguments_match(callback_dict, [arguments])):
+
                     offsets_to_remove.append(offset - 1)
 
             for offset in offsets_to_remove:

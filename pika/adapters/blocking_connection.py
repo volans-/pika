@@ -486,11 +486,11 @@ class BlockingChannel(channel.Channel):
         replies = [(spec.Basic.CancelOk,
                    {'consumer_tag': consumer_tag})] if nowait is False else []
         self._rpc(spec.Basic.Cancel(consumer_tag=consumer_tag,
-                                             nowait=nowait),
+                                    nowait=nowait),
                   self._on_cancelok, replies)
 
     def basic_get(self, queue=None, no_ack=False):
-        """Get a single message from the AMQP broker. Returns a set with the 
+        """Get a single message from the AMQP broker. Returns a set with the
         method frame, header frame and body.
 
         :param queue: The queue to get a message from
@@ -513,7 +513,7 @@ class BlockingChannel(channel.Channel):
     def basic_publish(self, exchange, routing_key, body,
                       properties=None, mandatory=False, immediate=False):
         """Publish to the channel with the given exchange, routing key and body.
-        Returns a boolean value indicating the success of the operation. For 
+        Returns a boolean value indicating the success of the operation. For
         more information on basic_publish and what the parameters do, see:
 
         http://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.publish
@@ -632,7 +632,7 @@ class BlockingChannel(channel.Channel):
 
         """
         if (not self.connection.publisher_confirms or
-            not self.connection.basic_nack):
+                not self.connection.basic_nack):
             raise exceptions.MethodNotImplemented('Not Supported on Server')
         self._confirmation = True
         replies = [spec.Confirm.SelectOk] if nowait is False else []
@@ -1182,7 +1182,7 @@ class BlockingChannel(channel.Channel):
 
         """
         if (callback is not None and
-            not utils.is_callable(callback)):
+                not utils.is_callable(callback)):
             raise TypeError("Callback should be a function or method, is %s",
                             type(callback))
 
